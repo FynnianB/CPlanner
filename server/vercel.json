@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "name": "cplanner",
+  "env": {
+    "TOKEN_SECRET": "@auth-jwt-secret",
+    "DEFAULT_ADMIN_PASSWORD": "@default-admin-password",
+    "DB_URL": "@cplanner-db"
+  },
+  "builds": [
+    {
+      "src": "src/index.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/.*",
+      "dest": "src/index.js"
+    }
+  ]
+}
