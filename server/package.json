@@ -8,7 +8,8 @@
     "dev": "nodemon src/index.js",
     "seed:admin": "node src/tasks/createAdminUser.js",
     "lint": "eslint src/",
-    "test": "mocha src/*.test.js src/**/*.test.js --watch --timeout 3000"
+    "test": "mocha src/*.test.js src/**/*.test.js --watch --timeout 3000",
+    "heroku-postbuild": "npm run seed:admin"
   },
   "author": "Spindus",
   "license": "MIT",

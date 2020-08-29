@@ -5,8 +5,8 @@ const middlewares = require('./auth.middlewares');
 
 const router = express.Router();
 
-const defLoginErr = 'Unable to login!';
 const signupErr = 'That username is already taken. Please choose another one';
+const defLoginErr = 'Unable to login!';
 
 router.get('/', controller.get);
 router.post('/signup',

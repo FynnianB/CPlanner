@@ -55,21 +55,25 @@ const validateUser = (defaultErrorMessage) => (req, res, next) => {
   } else {
     const error = defaultErrorMessage ? new Error(defaultErrorMessage) : result.error;
     res.status(422);
-    console.log('validateUserError', error.message);
     next(error);
   }
 };
 
 const findUser = (defLoginErr, isError, statusCode = 422) => async (req, res, next) => {
-  const user = await users.findOne({
-    username: req.body.username,
-  });
-  if (isError(user)) {
-    res.status(statusCode);
-    next(new Error(defLoginErr));
-  } else {
-    req.loggingInUser = user;
-    next();
+  try {
+    const user = await users.findOne({
+      username: req.body.username,
+    });
+    if (isError(user)) {
+      res.status(statusCode);
+      next(new Error(defLoginErr));
+    } else {
+      req.loggingInUser = user;
+      next();
+    }
+  } catch (error) {
+    res.status(500);
+    next(error);
   }
 };
 

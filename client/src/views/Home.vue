@@ -7,6 +7,7 @@
       <p>You want to combine your planner with the other ones. Then CPlanner is YOUR CHOISE!</p>
       <p class="lead">
         <router-link class="btn btn-primary btn-lg" :to="{ name: 'signup' }" role="button">Sign Up</router-link>
+        <router-link class="btn btn-info btn-lg btn-login" :to="{ name: 'login' }" role="button">Login</router-link>
       </p>
     </div>
   </div>
@@ -17,3 +18,8 @@ export default {
 
 };
 </script>
+<style>
+.btn-login {
+  margin-left: 1rem;
+}
+</style>

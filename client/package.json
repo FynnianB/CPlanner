@@ -1,16 +1,19 @@
 {
-  "name": "client",
+  "name": "cplanner",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint --fix"
+    "lint": "vue-cli-service lint --fix",
+    "now-build": "npm run build"
   },
   "dependencies": {
     "bootswatch": "^4.5.1",
     "core-js": "^3.6.5",
     "joi": "^17.2.0",
+    "markdown-it": "^11.0.0",
+    "markdown-it-emoji": "^1.4.0",
     "vue": "^2.6.11",
     "vue-router": "^3.2.0"
   },

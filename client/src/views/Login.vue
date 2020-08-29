@@ -43,10 +43,10 @@
 <script>
 import Joi from 'joi';
 
-const LOGIN_URL = 'http://localhost:5000/auth/login';
+const LOGIN_URL = 'https://cplanner-api.herokuapp.com/auth/login';
 
 const schema = Joi.object({
-  username: Joi.string().pattern(new RegExp('^[a-zA-Z0-9_-]+$')).min(6).max(30)
+  username: Joi.string().pattern(new RegExp('^[a-zA-Z0-9_-]+$')).min(5).max(30)
     .required(),
   password: Joi.string().trim().pattern(new RegExp('^\\S*$'))
     .pattern(new RegExp('^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,30}$'))

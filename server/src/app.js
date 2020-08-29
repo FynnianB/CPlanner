@@ -10,12 +10,12 @@ const app = express();
 const middlewares = require('./auth/auth.middlewares');
 
 const auth = require('./auth/auth.routes');
-const notes = require('./api/notes');
-const users = require('./api/users');
+const notes = require('./api/notes/notes.routes');
+const users = require('./api/users/users.routes');
 
 app.use(volleyball);
 app.use(cors({
-  origin: 'http://localhost:8080',
+  origin: ['http://localhost:8080', 'https://cplanner.vercel.app'],
 }));
 app.use(express.json());
 app.use(helmet());
