@@ -116,3 +116,7 @@ dist
 .pnp.*
 
 TODO.md
+
+.git
+.vscode
+.gitignore
