@@ -43,7 +43,7 @@
 <script>
 import Joi from 'joi';
 
-const LOGIN_URL = 'https://app.fynnian-brosius.de/auth/login';
+const LOGIN_URL = process.env.VUE_APP_API_URL+'auth/login';
 
 const schema = Joi.object({
   username: Joi.string().pattern(new RegExp('^[a-zA-Z0-9_-]+$')).min(5).max(30)

@@ -1,6 +1,6 @@
-const schema = require('./notes.schema');
+const schema = require('./calendars.schema');
 
-const validateNote = (defaultErrorMessage) => (req, res, next) => {
+const validateDate = (defaultErrorMessage) => (req, res, next) => {
   const result = schema.validate(req.body);
   if (!result.error) {
     next();
@@ -12,5 +12,5 @@ const validateNote = (defaultErrorMessage) => (req, res, next) => {
 };
 
 module.exports = {
-  validateNote,
+  validateDate,
 };

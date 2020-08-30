@@ -10,8 +10,9 @@ const app = express();
 const middlewares = require('./auth/auth.middlewares');
 
 const auth = require('./auth/auth.routes');
-const notes = require('./api/notes/notes.routes');
+const groups = require('./api/groups/groups.routes');
 const users = require('./api/users/users.routes');
+const calendars = require('./api/calendars/calendars.routes');
 
 app.use(volleyball);
 app.use(cors({
@@ -29,7 +30,8 @@ app.get('/', (req, res) => {
 });
 
 app.use('/auth', auth);
-app.use('/api/v1/notes', middlewares.isLoggedIn, notes);
+app.use('/api/v1/calendars', middlewares.isLoggedIn, calendars);
+app.use('/api/v1/groups', middlewares.isLoggedIn, groups);
 app.use('/api/v1/users', middlewares.isLoggedIn, middlewares.isAdmin, users);
 
 function notFound(req, res, next) {

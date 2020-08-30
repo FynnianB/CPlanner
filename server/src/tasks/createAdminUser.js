@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs');
-const db = require('../db/connection');
 require('dotenv').config();
+const db = require('../db/connection');
 
 const users = db.get('users');
 

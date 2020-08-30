@@ -6,6 +6,9 @@
     <button @click="logout()" class="btn btn-primary">Logout</button>
     <br>
     <br>
+    <router-link class="btn btn-success" :to="{ name: 'calendar' }" role="button">Calendar</router-link>
+    <br>
+    <br>
     <button @click="showForm = !showForm" class="btn btn-info">Toggle Form</button>
     <br>
     <br>
@@ -42,7 +45,7 @@ import MDemoji from 'markdown-it-emoji';
 const md = MarkdownIt();
 md.use(MDemoji);
 
-const API_URL = 'https://app.fynnian-brosius.de/';
+const API_URL = process.env.VUE_APP_API_URL;
 export default {
   data: () => ({
     showForm: false,
@@ -60,6 +63,7 @@ export default {
       }
     }).then(res => res.json())
     .then((result) => {
+      console.log(result);
       if(result.user) {
         this.user = result.user;
         this.getNotes();
