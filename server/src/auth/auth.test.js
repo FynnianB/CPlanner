@@ -81,7 +81,7 @@ describe('POST /auth/login', () => {
       .expect(422);
     expect(response.body.message).to.equal('Unable to login!');
   });
-  it('should only allow valid users to login', async () => {
+  it('should login', async () => {
     const response = await request(app)
       .post('/auth/login')
       .send(newUser)

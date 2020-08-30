@@ -59,7 +59,7 @@
 <script>
 import Joi from 'joi';
 
-const SIGNUP_URL = 'https://cplanner-api.herokuapp.com/auth/signup';
+const SIGNUP_URL = 'https://app.fynnian-brosius.de/auth/signup';
 const schema = Joi.object({
   username: Joi.string().pattern(new RegExp('^[a-zA-Z0-9_-]+$')).min(5).max(30)
     .required(),

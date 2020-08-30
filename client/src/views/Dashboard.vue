@@ -42,7 +42,7 @@ import MDemoji from 'markdown-it-emoji';
 const md = MarkdownIt();
 md.use(MDemoji);
 
-const API_URL = 'https://cplanner-api.herokuapp.com/';
+const API_URL = 'https://app.fynnian-brosius.de/';
 export default {
   data: () => ({
     showForm: false,
