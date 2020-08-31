@@ -1,5 +1,5 @@
 const { schema, groupSchema, roleSchema } = require('./groups.schema');
-const { groups, userGroups } = require('./groups.model');
+const { users, groups, userGroups } = require('./groups.model');
 
 const validateCreatableGroup = (defaultErrorMessage) => (req, res, next) => {
   const result = schema.validate(req.body);
@@ -23,7 +23,7 @@ const validateGroupState = (defaultErrorMessage) => (req, res, next) => {
   }
 };
 
-const validateUpdatedUser = (defaultErrorMessage) => (req, res, next) => {
+const validateRoleOrDelete = (defaultErrorMessage) => (req, res, next) => {
   const result = roleSchema.validate(req.body);
   if (!result.error) {
     next();
@@ -51,16 +51,16 @@ const findGroup = (defCreateErr, isError, statusCode = 422) => async (req, res, 
   }
 };
 
-const findGroupById = (defCreateErr, isError, statusCode = 422) => async (req, res, next) => {
+const findGroupById = (defCreateErr, ifStatement, statusCode = 422) => async (req, res, next) => {
   try {
     const group = await groups.findOne({
       _id: req.params.groupId,
     });
-    if (isError(group)) {
-      res.status(statusCode);
-      next(new Error(defCreateErr));
-    } else {
+    if (ifStatement(group)) {
       next();
+    } else {
+      res.status(statusCode);
+      throw new Error(defCreateErr);
     }
   } catch (error) {
     res.status(500);
@@ -83,7 +83,7 @@ const isGroupAdmin = async (req, res, next) => {
   }
 };
 
-const isParamGroupAdmin = async (req, res, next) => {
+const isParamNotGroupAdmin = async (req, res, next) => {
   try {
     const group = await groups.findOne({ _id: req.params.groupId });
     if (group.admin !== req.params.userId) {
@@ -98,17 +98,33 @@ const isParamGroupAdmin = async (req, res, next) => {
   }
 };
 
-const isUserInGroup = async (req, res, next) => {
+const isUserInGroup = (ifStatement) => async (req, res, next) => {
   try {
-    const foundUser = userGroups.findOne({ user: req.params.userId, group: req.params.groupId });
-    if (foundUser) {
+    const foundUser = await userGroups.findOne({ user: req.params.userId, group: req.params.groupId });
+    if (ifStatement(foundUser)) {
       next();
     } else {
       res.status(404);
-      next(new Error('User not found'));
+      throw new Error('Unable to proceed');
     }
   } catch (error) {
-    res.status(422);
+    res.status(res.statusCode === 200 ? 422 : res.statusCode);
+    next(error);
+  }
+};
+
+const validateUserAndGroup = async (req, res, next) => {
+  try {
+    const foundUser = await users.findOne({ _id: req.params.userId, active: true });
+    const foundGroup = await groups.findOne({ _id: req.params.groupId });
+    if (foundUser && foundGroup) {
+      next();
+    } else {
+      res.status(422);
+      throw new Error('Unable to fetch inputs');
+    }
+  } catch (error) {
+    res.status(res.statusCode === 200 ? 422 : res.statusCode);
     next(error);
   }
 };
@@ -116,10 +132,11 @@ const isUserInGroup = async (req, res, next) => {
 module.exports = {
   validateCreatableGroup,
   validateGroupState,
-  validateUpdatedUser,
+  validateRoleOrDelete,
   findGroup,
   findGroupById,
-  isParamGroupAdmin,
+  isParamNotGroupAdmin,
   isGroupAdmin,
   isUserInGroup,
+  validateUserAndGroup,
 };

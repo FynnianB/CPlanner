@@ -1,4 +1,4 @@
-const { groups, userGroups } = require('./groups.model');
+const { invites, groups, userGroups } = require('./groups.model');
 
 async function addUserToGroup(userId, groupId, userRole = 'member') {
   try {
@@ -61,17 +61,25 @@ const createGroup = async (req, res, next) => {
   }
 };
 
-const changeGroup = async (req, res, next) => {
+const updateGroup = async (req, res, next) => {
   try {
     if (req.body.state) {
       const foundUserInGroup = await userGroups.findOne({ user: req.user._id, group: req.params.groupId });
       if (!foundUserInGroup) {
-        const result = await addUserToGroup(req.user._id, req.params.groupId);
-        if (!result.error) {
-          res.json(result);
+        const foundInvite = await invites.findOne({ user: req.user._id, group: req.params.groupId });
+        if (foundInvite) {
+          const result = await addUserToGroup(req.user._id, req.params.groupId);
+          const result2 = await invites.findOneAndDelete({ user: req.user._id, group: req.params.groupId });
+          if (!result.error && !result2.error) {
+            res.json(result);
+          } else {
+            const err = result.error ? result : result2;
+            res.status(err.status);
+            next(err.error);
+          }
         } else {
-          res.status(result.status);
-          next(result.error);
+          res.status(401);
+          next(new Error('No Invite'));
         }
       } else {
         const err = new Error('User already in this group');
@@ -83,7 +91,7 @@ const changeGroup = async (req, res, next) => {
       if (foundUserInGroup) {
         if (!isAdminOfGroup(req.user._id, req.params.groupId)) {
           await userGroups.findOneAndDelete({ user: req.user._id, group: req.params.groupId });
-          res.json({ message: 'User successfully removed from Group' });
+          res.json({ message: 'User removed from Group' });
         } else {
           const err = new Error('The admin cannot leave his group');
           res.status(403);
@@ -106,17 +114,43 @@ const deleteGroup = async (req, res) => {
   res.json({ message: 'Group succesfully removed' });
 };
 
-const updateUser = async (req, res) => {
-  const foundAndUpdatedUser = await userGroups.findOneAndUpdate({ user: req.params.userId, group: req.params.groupId }, {
-    $set: req.body,
-  });
-  res.json(foundAndUpdatedUser);
+const updateUser = async (req, res, next) => {
+  if (req.body.delete) {
+    await userGroups.findOneAndDelete({ user: req.params.userId, group: req.params.groupId });
+    res.json({ message: 'User kicked from Group' });
+  } else {
+    const foundAndUpdatedUser = await userGroups.findOneAndUpdate({ user: req.params.userId, group: req.params.groupId }, {
+      $set: req.body,
+    });
+    res.json(foundAndUpdatedUser);
+  }
+};
+
+const inviteUser = async (req, res, next) => {
+  try {
+    const invite = {
+      user: req.params.userId,
+      group: req.params.groupId,
+    };
+    const foundInvite = await invites.findOne(invite);
+    if (!foundInvite) {
+      const insertedInvite = await invites.insert(invite);
+      res.json(insertedInvite);
+    } else {
+      res.status(422);
+      throw new Error('Invite already send');
+    }
+  } catch (error) {
+    res.status(res.statusCode === 200 ? 500 : res.statusCode);
+    next(error);
+  }
 };
 
 module.exports = {
   list,
   createGroup,
-  changeGroup,
+  updateGroup,
   deleteGroup,
   updateUser,
+  inviteUser,
 };

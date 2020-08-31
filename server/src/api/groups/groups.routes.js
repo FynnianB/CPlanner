@@ -11,21 +11,26 @@ const delErr = 'Group doesnt exists';
 router.get('/', controller.list);
 router.post('/',
   middlewares.validateCreatableGroup(),
-  middlewares.findGroup(createErr, (group) => group, 409),
+  middlewares.findGroup(createErr, (group) => !group, 409),
   controller.createGroup);
 router.put('/:groupId',
   middlewares.validateGroupState(),
-  controller.changeGroup);
+  controller.updateGroup);
 router.patch('/:groupId/:userId',
-  middlewares.validateUpdatedUser(),
+  middlewares.validateRoleOrDelete(),
+  middlewares.findGroupById(delErr, (group) => group, 409),
   middlewares.isGroupAdmin,
-  middlewares.isParamGroupAdmin,
-  middlewares.findGroupById(delErr, (group) => !group, 409),
-  middlewares.isUserInGroup,
+  middlewares.isParamNotGroupAdmin,
+  middlewares.isUserInGroup((user) => user),
   controller.updateUser);
 router.delete('/:groupId',
+  middlewares.findGroupById(delErr, (group) => group, 409),
   middlewares.isGroupAdmin,
-  middlewares.findGroupById(delErr, (group) => !group, 409),
   controller.deleteGroup);
+router.post('/:groupId/:userId',
+  middlewares.validateUserAndGroup,
+  middlewares.isGroupAdmin,
+  middlewares.isUserInGroup((user) => !user),
+  controller.inviteUser);
 
 module.exports = router;
