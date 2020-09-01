@@ -40,10 +40,10 @@ const findGroup = (defCreateErr, isError, statusCode = 422) => async (req, res, 
       title: req.body.title,
     });
     if (isError(group)) {
+      next();
+    } else {
       res.status(statusCode);
       next(new Error(defCreateErr));
-    } else {
-      next();
     }
   } catch (error) {
     res.status(500);
@@ -63,7 +63,7 @@ const findGroupById = (defCreateErr, ifStatement, statusCode = 422) => async (re
       throw new Error(defCreateErr);
     }
   } catch (error) {
-    res.status(500);
+    res.status(res.statusCode === 200 ? 500 : res.statusCode);
     next(error);
   }
 };

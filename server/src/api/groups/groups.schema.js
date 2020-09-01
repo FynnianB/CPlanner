@@ -11,7 +11,7 @@ const groupSchema = Joi.object({
 
 const roleSchema = Joi.object({
   role: Joi.string().valid('member', 'admin'),
-  delete: Joi.bool(),
+  delete: Joi.bool().valid(true),
 }).xor('role', 'delete');
 
 module.exports = {

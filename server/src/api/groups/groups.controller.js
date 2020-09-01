@@ -89,7 +89,8 @@ const updateGroup = async (req, res, next) => {
     } else {
       const foundUserInGroup = await userGroups.findOne({ user: req.user._id, group: req.params.groupId });
       if (foundUserInGroup) {
-        if (!isAdminOfGroup(req.user._id, req.params.groupId)) {
+        const isAdmin = await isAdminOfGroup(req.user._id, req.params.groupId);
+        if (!isAdmin) {
           await userGroups.findOneAndDelete({ user: req.user._id, group: req.params.groupId });
           res.json({ message: 'User removed from Group' });
         } else {
