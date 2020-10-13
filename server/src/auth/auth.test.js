@@ -13,15 +13,6 @@ const newUser = {
   password: 'Password123',
 };
 
-describe('GET /auth', () => {
-  it('should respond with a message', async () => {
-    const response = await request(app)
-      .get('/auth')
-      .expect(200);
-    expect(response.body.message).to.equal('Auth router working!');
-  });
-});
-
 describe('POST /auth/signup', () => {
   before(async () => {
     await users.remove({});

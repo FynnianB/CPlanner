@@ -7,4 +7,11 @@ const schema = Joi.object({
   active: Joi.bool(),
 });
 
-module.exports = schema;
+const idSchema = Joi.object({
+  userId: Joi.string().trim().length(24).required(),
+});
+
+module.exports = {
+  schema,
+  idSchema,
+};

@@ -45,24 +45,38 @@ async function createAdminUser() {
   }
 }
 
-describe('GET /api/v1/users', () => {
+describe('GET /api/v1/users:id', () => {
   before(async () => {
     await users.remove({});
     await createAdminUser();
   });
-  it('should respond with a array of users', async () => {
+  it('should require valid id', async () => {
     const res = await request(app)
-      .get('/api/v1/users')
+      .get('/api/v1/users/123')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(422);
+    expect(res.body.message).to.equal('"userId" length must be 24 characters long');
+  });
+  it('should require existing userId', async () => {
+    const res = await request(app)
+      .get('/api/v1/users/123456789012345678901234')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(422);
+    expect(res.body.message).to.equal('User not found');
+  });
+  it('should get user info', async () => {
+    const res = await request(app)
+      .get(`/api/v1/users/${adminId}`)
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200);
-    expect(res.body).to.be.an('array');
+    expect(res.body).to.have.property('username');
   });
 });
 
-describe('PATCH /api/v1/users:id', () => {
-  it('should require existing userId', async () => {
+describe('PATCH /api/v1/admin/users:userId', () => {
+  it('should require valid and existing user', async () => {
     const res = await request(app)
-      .patch('/api/v1/users/123tt423ttxt23')
+      .patch('/api/v1/admin/users/123tt423ttxt23')
       .set('Authorization', `Bearer ${adminToken}`)
       .send({})
       .expect(422);
@@ -70,7 +84,7 @@ describe('PATCH /api/v1/users:id', () => {
   });
   it('should update AdminUser', async () => {
     const res = await request(app)
-      .patch(`/api/v1/users/${adminId}`)
+      .patch(`/api/v1/admin/users/${adminId}`)
       .set('Authorization', `Bearer ${adminToken}`)
       .send({ active: false })
       .expect(200);

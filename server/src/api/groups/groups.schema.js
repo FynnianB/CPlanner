@@ -6,7 +6,7 @@ const schema = Joi.object({
 });
 
 const groupSchema = Joi.object({
-  state: Joi.bool().required(),
+  state: Joi.string().valid('accept', 'deny', 'remove').required(),
 });
 
 const roleSchema = Joi.object({
@@ -14,8 +14,13 @@ const roleSchema = Joi.object({
   delete: Joi.bool().valid(true),
 }).xor('role', 'delete');
 
+const idSchema = Joi.object({
+  groupId: Joi.string().trim().length(24).required(),
+});
+
 module.exports = {
   schema,
   groupSchema,
   roleSchema,
+  idSchema,
 };

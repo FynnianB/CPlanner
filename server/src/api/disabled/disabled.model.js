@@ -1,9 +1,9 @@
 const db = require('../../db/connection');
 
+const disabled = db.get('disabled');
 const dates = db.get('dates');
-const notifications = db.get('notifications');
 
 module.exports = {
+  disabled,
   dates,
-  notifications,
 };

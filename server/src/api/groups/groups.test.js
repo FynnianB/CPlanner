@@ -11,7 +11,8 @@ const db = require('../../db/connection');
 const users = db.get('users');
 const userGroups = db.get('userGroups');
 const groups = db.get('groups');
-const invites = db.get('invites');
+const groupInvites = db.get('groupInvites');
+const notifications = db.get('notifications');
 
 let adminToken = '';
 let adminId = '';
@@ -103,7 +104,8 @@ describe('GET /api/v1/groups', () => {
     await users.remove({});
     await userGroups.remove({});
     await groups.remove({});
-    await invites.remove({});
+    await groupInvites.remove({});
+    await notifications.remove({});
     await createAdminUser();
   });
   it('should require a loggedin user', async () => {
@@ -164,7 +166,7 @@ describe('PUT errors /api/v1/groups', () => {
     const res = await request(app)
       .put(`/api/v1/groups/${groupId}`)
       .set('Authorization', `Bearer ${adminToken}`)
-      .send({ state: true })
+      .send({ state: 'accept' })
       .expect(422);
     expect(res.body.message).to.equal('User already in this group');
   });
@@ -172,7 +174,7 @@ describe('PUT errors /api/v1/groups', () => {
     const res = await request(app)
       .put(`/api/v1/groups/${groupId}`)
       .set('Authorization', `Bearer ${user2Token}`)
-      .send({ state: true })
+      .send({ state: 'accept' })
       .expect(401);
     expect(res.body.message).to.equal('No Invite');
   });
@@ -180,7 +182,7 @@ describe('PUT errors /api/v1/groups', () => {
     const res = await request(app)
       .put(`/api/v1/groups/${groupId}`)
       .set('Authorization', `Bearer ${user2Token}`)
-      .send({ state: false })
+      .send({ state: 'remove' })
       .expect(422);
     expect(res.body.message).to.equal('User is not in this group');
   });
@@ -188,7 +190,7 @@ describe('PUT errors /api/v1/groups', () => {
     const res = await request(app)
       .put(`/api/v1/groups/${groupId}`)
       .set('Authorization', `Bearer ${adminToken}`)
-      .send({ state: false })
+      .send({ state: 'remove' })
       .expect(403);
     expect(res.body.message).to.equal('The admin cannot leave his group');
   });
@@ -225,7 +227,7 @@ describe('POST invite /api/v1/groups', () => {
       .set('Authorization', `Bearer ${adminToken}`)
       .send({})
       .expect(404);
-    expect(res.body.message).to.equal('Unable to proceed');
+    expect(res.body.message).to.equal('User already in group');
   });
   it('should create invite', async () => {
     const res = await request(app)
@@ -250,17 +252,17 @@ describe('PUT actually insert /api/v1/groups', () => {
     const res = await request(app)
       .put(`/api/v1/groups/${groupId}`)
       .set('Authorization', `Bearer ${user2Token}`)
-      .send({ state: true })
+      .send({ state: 'accept' })
       .expect(200);
     expect(res.body).to.have.property('_id');
-    const entry = await invites.findOne({ user: user2Id, group: groupId });
+    const entry = await groupInvites.findOne({ user: user2Id, group: groupId });
     expect(entry).to.be.null; // eslint-disable-line
   });
   it('should remove user', async () => {
     const res = await request(app)
       .put(`/api/v1/groups/${groupId}`)
       .set('Authorization', `Bearer ${user2Token}`)
-      .send({ state: false })
+      .send({ state: 'remove' })
       .expect(200);
     expect(res.body.message).to.equal('User removed from Group');
   });
@@ -282,10 +284,10 @@ describe('PUT actually insert /api/v1/groups', () => {
     const res = await request(app)
       .put(`/api/v1/groups/${groupId}`)
       .set('Authorization', `Bearer ${user2Token}`)
-      .send({ state: true })
+      .send({ state: 'accept' })
       .expect(200);
     expect(res.body).to.have.property('_id');
-    const entry = await invites.findOne({ user: user2Id, group: groupId });
+    const entry = await groupInvites.findOne({ user: user2Id, group: groupId });
     expect(entry).to.be.null; // eslint-disable-line
   });
 });

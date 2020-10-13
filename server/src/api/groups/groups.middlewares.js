@@ -1,5 +1,17 @@
-const { schema, groupSchema, roleSchema } = require('./groups.schema');
+const {
+  schema, groupSchema, roleSchema, idSchema,
+} = require('./groups.schema');
 const { users, groups, userGroups } = require('./groups.model');
+
+const validateId = (req, res, next) => {
+  const result = idSchema.validate(req.params);
+  if (!result.error) {
+    next();
+  } else {
+    res.status(422);
+    next(result.error);
+  }
+};
 
 const validateCreatableGroup = (defaultErrorMessage) => (req, res, next) => {
   const result = schema.validate(req.body);
@@ -98,14 +110,29 @@ const isParamNotGroupAdmin = async (req, res, next) => {
   }
 };
 
-const isUserInGroup = (ifStatement) => async (req, res, next) => {
+const isUserInGroup = (ifStatement, defError = 'Unable to proceed') => async (req, res, next) => {
   try {
     const foundUser = await userGroups.findOne({ user: req.params.userId, group: req.params.groupId });
     if (ifStatement(foundUser)) {
       next();
     } else {
       res.status(404);
-      throw new Error('Unable to proceed');
+      throw new Error(defError);
+    }
+  } catch (error) {
+    res.status(res.statusCode === 200 ? 422 : res.statusCode);
+    next(error);
+  }
+};
+
+const isInGroup = (ifStatement, defError = 'Unable to proceed') => async (req, res, next) => {
+  try {
+    const foundUser = await userGroups.findOne({ user: req.user._id, group: req.params.groupId });
+    if (ifStatement(foundUser)) {
+      next();
+    } else {
+      res.status(404);
+      throw new Error(defError);
     }
   } catch (error) {
     res.status(res.statusCode === 200 ? 422 : res.statusCode);
@@ -139,4 +166,6 @@ module.exports = {
   isGroupAdmin,
   isUserInGroup,
   validateUserAndGroup,
+  validateId,
+  isInGroup,
 };

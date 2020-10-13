@@ -9,6 +9,10 @@ const createErr = 'Grouptitle already exists. Choose another one';
 const delErr = 'Group doesnt exists';
 
 router.get('/', controller.list);
+router.get('/:groupId',
+  middlewares.validateId,
+  middlewares.isInGroup((user) => user),
+  controller.getItem);
 router.post('/',
   middlewares.validateCreatableGroup(),
   middlewares.findGroup(createErr, (group) => !group, 409),
@@ -19,7 +23,7 @@ router.put('/:groupId',
 router.post('/:groupId/:userId',
   middlewares.validateUserAndGroup,
   middlewares.isGroupAdmin,
-  middlewares.isUserInGroup((user) => !user),
+  middlewares.isUserInGroup((user) => !user, 'User already in group'),
   controller.inviteUser);
 router.patch('/:groupId/:userId',
   middlewares.validateRoleOrDelete(),

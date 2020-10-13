@@ -8,7 +8,6 @@ const router = express.Router();
 const signupErr = 'That username is already taken. Please choose another one';
 const defLoginErr = 'Unable to login!';
 
-router.get('/', controller.get);
 router.post('/signup',
   middlewares.validateUser(),
   middlewares.findUser(signupErr, (user) => user, 409),

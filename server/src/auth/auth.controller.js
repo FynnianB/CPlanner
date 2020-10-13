@@ -3,12 +3,6 @@ const jwt = require('jsonwebtoken');
 
 const users = require('./auth.model');
 
-function respondError422(res, next) {
-  res.status(422);
-  const error = new Error('Unable to login!');
-  next(error);
-}
-
 function createTokenSendResponse(user, res, next) {
   const payload = {
     _id: user._id,
@@ -26,12 +20,6 @@ function createTokenSendResponse(user, res, next) {
     }
   });
 }
-
-const get = (req, res) => {
-  res.json({
-    message: 'Auth router working!',
-  });
-};
 
 const signup = async (req, res, next) => {
   try {
@@ -66,7 +54,6 @@ const login = async (req, res, next) => {
 };
 
 module.exports = {
-  get,
   signup,
   login,
 };

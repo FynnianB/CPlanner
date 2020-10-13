@@ -1,4 +1,4 @@
-const schema = require('./users.schema');
+const { schema, idSchema, changesSchema } = require('./users.schema');
 const users = require('./users.model');
 
 const validateUser = (defaultErrorMessage) => (req, res, next) => {
@@ -12,10 +12,20 @@ const validateUser = (defaultErrorMessage) => (req, res, next) => {
   }
 };
 
+const validateId = (req, res, next) => {
+  const result = idSchema.validate(req.params);
+  if (!result.error) {
+    next();
+  } else {
+    res.status(422);
+    next(result.error);
+  }
+};
+
 const findUserById = (defNoFoundErr) => async (req, res, next) => {
   try {
     const foundUser = await users.findOne({
-      _id: req.params.id,
+      _id: req.params.userId,
     });
     if (foundUser) {
       next();
@@ -26,7 +36,7 @@ const findUserById = (defNoFoundErr) => async (req, res, next) => {
   } catch (error) {
     if (error.message === 'Argument passed in must be a single String of 12 bytes or a string of 24 hex characters') {
       res.status(422);
-      error.message = 'User not found';
+      error.message = defNoFoundErr;
     } else {
       res.status(res.statusCode === 200 ? 500 : res.statusCode);
     }
@@ -37,4 +47,5 @@ const findUserById = (defNoFoundErr) => async (req, res, next) => {
 module.exports = {
   validateUser,
   findUserById,
+  validateId,
 };

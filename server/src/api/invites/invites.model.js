@@ -1,15 +1,19 @@
 const db = require('../../db/connection');
 
 const groups = db.get('groups');
-const userGroups = db.get('userGroups');
 const users = db.get('users');
-const groupInvites = db.get('groupInvites');
+const userGroups = db.get('userGroups');
+const userInvites = db.get('userInvites');
+const invites = db.get('invites');
+const dates = db.get('dates');
 const notifications = db.get('notifications');
 
 module.exports = {
   groups,
-  userGroups,
   users,
-  groupInvites,
+  userInvites,
+  userGroups,
+  invites,
+  dates,
   notifications,
 };

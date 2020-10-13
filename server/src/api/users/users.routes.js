@@ -3,12 +3,16 @@ const express = require('express');
 const controller = require('./users.controller');
 const middlewares = require('./users.middlewares');
 
-const router = express.Router();
+const user = express.Router();
 
-router.get('/', controller.list);
-router.patch('/:id',
+user.get('/:userId', middlewares.validateId, controller.getItem);
+user.patch('/', middlewares.validateUser(), controller.patchUserSettings);
+
+const users = express.Router();
+
+users.patch('/:userId',
   middlewares.validateUser(),
   middlewares.findUserById('User not found'),
-  controller.patchUser);
+  controller.patchUserAsAdmin);
 
-module.exports = router;
+module.exports = { users, user };
