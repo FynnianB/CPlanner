@@ -1,8 +1,24 @@
-const { schema, schemaId, patchSchema } = require('./calendars.schema');
+const {
+  schema,
+  schemaId,
+  patchSchema,
+  zoneSchema,
+} = require('./calendars.schema');
 const { dates } = require('./calendars.model');
 
 const validateDate = (defaultErrorMessage) => (req, res, next) => {
   const result = schema.validate(req.body);
+  if (!result.error) {
+    next();
+  } else {
+    const error = defaultErrorMessage ? new Error(defaultErrorMessage) : result.error;
+    res.status(422);
+    next(error);
+  }
+};
+
+const validateDateZone = (defaultErrorMessage) => (req, res, next) => {
+  const result = zoneSchema.validate(req.body);
   if (!result.error) {
     next();
   } else {
@@ -75,4 +91,5 @@ module.exports = {
   isDateCreator,
   validatePatchableDate,
   formatDates,
+  validateDateZone,
 };

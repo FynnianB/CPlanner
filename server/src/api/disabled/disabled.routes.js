@@ -5,8 +5,8 @@ const middlewares = require('./disabled.middlewares');
 
 const router = express.Router();
 
-router.get('/', middlewares.validateDate(), controller.list);
-router.post('/', middlewares.validateDate(), controller.insertDate);
+router.post('/', middlewares.validateDate(), controller.list);
+router.put('/', middlewares.validateDate(), controller.insertDate);
 router.delete('/', middlewares.validateDates, controller.deleteDate);
 
 module.exports = router;

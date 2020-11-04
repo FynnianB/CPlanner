@@ -62,7 +62,7 @@ const validateUser = (defaultErrorMessage) => (req, res, next) => {
 const findUser = (defLoginErr, isError, statusCode = 422) => async (req, res, next) => {
   try {
     const user = await users.findOne({
-      username: req.body.username,
+      username: new RegExp(req.body.username, 'i'),
     });
     if (isError(user)) {
       res.status(statusCode);

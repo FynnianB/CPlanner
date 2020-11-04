@@ -5,9 +5,9 @@ const middlewares = require('./calendars.middlewares');
 
 const router = express.Router();
 
-router.get('/', controller.list);
+router.post('/', middlewares.validateDateZone(), controller.list);
 router.get('/:dateId', middlewares.validateId, controller.getItem);
-router.post('/', middlewares.validateDate(), middlewares.formatDates, controller.insertDate);
+router.put('/', middlewares.validateDate(), middlewares.formatDates, controller.insertDate);
 router.patch('/:dateId',
   middlewares.validateId,
   middlewares.dateExists,

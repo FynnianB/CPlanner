@@ -6,7 +6,7 @@ const middlewares = require('./users.middlewares');
 const user = express.Router();
 
 user.get('/:userId', middlewares.validateId, controller.getItem);
-user.patch('/', middlewares.validateUser(), controller.patchUserSettings);
+user.patch('/', middlewares.validateUser(), controller.patchUser);
 
 const users = express.Router();
 
