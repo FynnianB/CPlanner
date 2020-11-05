@@ -17,6 +17,8 @@ jobs:
           cd client
           npm install
           npm run build
+        env:
+          VUE_APP_API_KEY: ${{ secrets.VUE_APP_API_KEY }}
 
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@3.6.2
