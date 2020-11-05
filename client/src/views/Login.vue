@@ -1,6 +1,5 @@
 <template>
   <v-app>
-    {{API_URL}}
     <v-main>
       <v-container class="fill-height d-flex justify-center">
         <div class="align-center">
@@ -159,7 +158,6 @@ export default {
     },
   },
   data: () => ({
-    API_URL: process.env.VUE_APP_API_URL,
     loginUser: {
       username: '',
       password: '',
@@ -210,7 +208,6 @@ export default {
   },
   methods: {
     login() {
-      console.log(process.env, secrets);
       this.$v.loginUser.$touch()
       this.alertBox.enabled = false
       if (this.$v.loginUser.$invalid) {
