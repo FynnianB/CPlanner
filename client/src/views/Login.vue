@@ -210,6 +210,7 @@ export default {
   },
   methods: {
     login() {
+      console.log(process.env.VUE_APP_API_URL);
       this.$v.loginUser.$touch()
       this.alertBox.enabled = false
       if (this.$v.loginUser.$invalid) {
