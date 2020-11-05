@@ -725,7 +725,7 @@ export default {
         if (this.creatingEvent.location) {
           event.location = this.creatingEvent.location
         }
-        fetch(`${process.env.VUE_APP_API_URL}api/v1/calendars/`, {
+        fetch(process.env.VUE_APP_API_URL+'api/v1/calendars/', {
           method: 'PUT',
           headers: {
             authorization: `Bearer ${localStorage.token}`,
@@ -798,7 +798,7 @@ export default {
         }
         const startStr = dayjs(ev.dates[0]+'-'+ev.times[0], 'YYYY-MM-DD-HH:mm').toISOString();
         const endStr = dayjs(ev.dates[1]+'-'+ev.times[1], 'YYYY-MM-DD-HH:mm').toISOString();
-        fetch(`${process.env.VUE_APP_API_URL}api/v1/calendars/`+ev._id, {
+        fetch(process.env.VUE_APP_API_URL+'api/v1/calendars/'+ev._id, {
           method: 'PATCH',
           headers: {
             authorization: `Bearer ${localStorage.token}`,
@@ -851,7 +851,7 @@ export default {
       }
     },
     deleteEvent (ev) {
-      fetch(`${process.env.VUE_APP_API_URL}api/v1/calendars/`+ev._id, {
+      fetch(process.env.VUE_APP_API_URL+'api/v1/calendars/'+ev._id, {
         method: 'DELETE',
         headers: {
           authorization: `Bearer ${localStorage.token}`,
@@ -905,7 +905,7 @@ export default {
     updateRange ({ start, end }) {
       this.start = start
       this.end = end
-      fetch(`${process.env.VUE_APP_API_URL}api/v1/calendars`, {
+      fetch(process.env.VUE_APP_API_URL+'api/v1/calendars', {
         method: 'POST',
         headers: {
           authorization: `Bearer ${localStorage.token}`,

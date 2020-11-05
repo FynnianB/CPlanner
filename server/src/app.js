@@ -19,7 +19,7 @@ const disabled = require('./api/disabled/disabled.routes');
 
 app.use(volleyball);
 app.use(cors({
-  origin: ['http://localhost:8080', 'https://cplanner.vercel.app', 'https://fynnianb.github.io/'],
+  origin: ['http://localhost:8080', 'https://cplanner.vercel.app', 'https://fynnianb.github.io'],
 }));
 app.use(express.json());
 app.use(helmet());
