@@ -172,7 +172,7 @@
                   ref="dialog"
                   v-model="datePicker"
                   :return-value.sync="selectedEvent.dates"
-                  persistent
+                  :v-click-outside="datePicker = false"
                   width="290px"
                 >
                   <template v-slot:activator="{ on, attrs }">
@@ -374,7 +374,7 @@
                     ref="dialog3"
                     v-model="createDatePicker"
                     :return-value.sync="creatingEvent.dates"
-                    persistent
+                    :v-click-outside="createDatePicker = false"
                     width="290px"
                   >
                     <template v-slot:activator="{ on, attrs }">

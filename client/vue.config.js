@@ -2,5 +2,7 @@ module.exports = {
   "transpileDependencies": [
     "vuetify"
   ],
-  publicPath: '/CPlanner/'
+  publicPath: process.env.NODE_ENV === 'production'
+    ? '/CPlanner/'
+    : '/'
 }
