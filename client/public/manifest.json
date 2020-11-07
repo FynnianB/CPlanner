@@ -1,0 +1,10 @@
+{
+  "name": "CPlanner",
+  "lang": "de",
+  "description": "Plan your events smart and easy",
+  "start_url": "index.html",
+  "background_color": "#fff",
+  "theme_color": "#2196f3",
+  "display": "standalone",
+  "orientation": "portrait"
+}
