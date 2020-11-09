@@ -6,20 +6,20 @@
 
       <v-sheet height="64">
         <v-toolbar flat>
-          <v-btn fab text color="grey darken-2">
+          <v-btn fab text color="grey darken-2" @click.stop="enableNavDrawer">
             <v-icon>
               mdi-menu
             </v-icon>
           </v-btn>
-          <v-btn outlined class="mr-4 ml-4" color="grey darken-2" @click="setToday">
+          <v-btn outlined class="mr-4 ml-4" color="grey darken-2" @click.stop="setToday">
             Heute
           </v-btn>
-          <v-btn fab text small color="grey darken-2" @click="prev">
+          <v-btn fab text small color="grey darken-2" @click.stop="prev">
             <v-icon small>
               mdi-chevron-left
             </v-icon>
           </v-btn>
-          <v-btn fab text small color="grey darken-2" @click="next">
+          <v-btn fab text small color="grey darken-2" @click.stop="next">
             <v-icon small>
               mdi-chevron-right
             </v-icon>
@@ -78,7 +78,7 @@
           bottom
           right
           fab
-          @click="createEvent"
+          @click.stop="createEvent"
         >
           <v-icon>mdi-plus</v-icon>
         </v-btn>
@@ -91,6 +91,7 @@
           :activator="selectedElement"
           :close-on-click="currentlyEditing !== selectedEvent._id ? true : false"
           offset-x
+          offset-overflow
           min-width="350px">
           <v-card color="grey lighten-4" min-width="350px" flat>
             <v-toolbar :color="selectedEvent.color" dark>
@@ -99,22 +100,22 @@
               <v-btn
                 v-if="currentlyEditing !== selectedEvent._id"
                 icon
-                @click="editEvent(selectedEvent)">
+                @click.stop="editEvent(selectedEvent)">
                 <v-icon>mdi-pencil</v-icon>
               </v-btn>
               <v-btn
                 v-else
                 icon
-                @click="saveEvent(selectedEvent)">
+                @click.stop="saveEvent(selectedEvent)">
                 <v-icon>mdi-content-save</v-icon>
               </v-btn>
               <v-btn
                 v-if="currentlyEditing !== selectedEvent._id"
-                @click="deleteEvent(selectedEvent)"
+                @click.stop="deleteEvent(selectedEvent)"
                 icon>
                 <v-icon>mdi-delete</v-icon>
               </v-btn>
-              <v-btn @click="closeEvent(selectedEvent)" icon>
+              <v-btn @click.stop="closeEvent(selectedEvent)" icon>
                 <v-icon>mdi-close</v-icon>
               </v-btn>
             </v-toolbar>
@@ -204,14 +205,14 @@
                     <v-btn
                       text
                       color="calendar"
-                      @click="datePicker = false"
+                      @click.stop="datePicker = false"
                     >
                       Schliessen
                     </v-btn>
                     <v-btn
                       text
                       color="calendar"
-                      @click="$refs.dialog.save(selectedEvent.dates)"
+                      @click.stop="$refs.dialog.save(selectedEvent.dates)"
                     >
                       OK
                     </v-btn>
@@ -263,7 +264,7 @@
                         <v-btn
                           text
                           color="calendar"
-                          @click="timePicker = false"
+                          @click.stop="timePicker = false"
                           :style="{visibility: 'hidden'}"
                         >
                           Schliessen
@@ -271,7 +272,7 @@
                         <v-btn
                           text
                           color="calendar"
-                          @click="$refs.dialog2.save(selectedEvent.times)"
+                          @click.stop="$refs.dialog2.save(selectedEvent.times)"
                           :style="{visibility: 'hidden'}"
                         >
                           OK
@@ -294,14 +295,14 @@
                         <v-btn
                           text
                           color="calendar"
-                          @click="timePicker = false"
+                          @click.stop="timePicker = false"
                         >
                           Schliessen
                         </v-btn>
                         <v-btn
                           text
                           color="calendar"
-                          @click="$refs.dialog2.save(selectedEvent.times)"
+                          @click.stop="$refs.dialog2.save(selectedEvent.times)"
                         >
                           OK
                         </v-btn>
@@ -400,14 +401,14 @@
                       <v-btn
                         text
                         color="primary"
-                        @click="createDatePicker = false"
+                        @click.stop="createDatePicker = false"
                       >
                         Schliessen
                       </v-btn>
                       <v-btn
                         text
                         color="primary"
-                        @click="$refs.dialog3.save(creatingEvent.dates)"
+                        @click.stop="$refs.dialog3.save(creatingEvent.dates)"
                       >
                         OK
                       </v-btn>
@@ -466,7 +467,7 @@
                           <v-btn
                             text
                             color="primary"
-                            @click="createTimePicker = false"
+                            @click.stop="createTimePicker = false"
                             :style="{visibility: 'hidden'}"
                           >
                             Schliessen
@@ -474,7 +475,7 @@
                           <v-btn
                             text
                             color="primary"
-                            @click="$refs.dialog4.save(creatingEvent.times)"
+                            @click.stop="$refs.dialog4.save(creatingEvent.times)"
                             :style="{visibility: 'hidden'}"
                           >
                             OK
@@ -497,14 +498,14 @@
                           <v-btn
                             text
                             color="primary"
-                            @click="createTimePicker = false"
+                            @click.stop="createTimePicker = false"
                           >
                             Schliessen
                           </v-btn>
                           <v-btn
                             text
                             color="primary"
-                            @click="$refs.dialog4.save(creatingEvent.times)"
+                            @click.stop="$refs.dialog4.save(creatingEvent.times)"
                           >
                             OK
                           </v-btn>
@@ -546,14 +547,14 @@
             <v-btn
               color="blue darken-1"
               text
-              @click="resetCreateDialog"
+              @click.stop="resetCreateDialog"
             >
               Schliessen
             </v-btn>
             <v-btn
               color="blue darken-1"
               text
-              @click="saveCreateDialog"
+              @click.stop="saveCreateDialog"
             >
               Speichern
             </v-btn>
@@ -673,6 +674,9 @@ export default {
     },
   },
   methods: {
+    enableNavDrawer () {
+      this.$store.commit('setNavDrawer',true)
+    },
     resetAlertBox () {
       this.alertBox.enabled = false
       this.alertBox.type = 'error'

@@ -37,7 +37,7 @@
                       required
                       :append-icon="showLoginPass ? 'mdi-eye' : 'mdi-eye-off'"
                       :type="showLoginPass ? 'text' : 'password'"
-                      @click:append="showLoginPass = !showLoginPass"
+                      @click:append.stop="showLoginPass = !showLoginPass"
                     ></v-text-field>
                     <v-checkbox
                       v-model="loginUser.rememberMe"
@@ -50,7 +50,7 @@
                   <v-btn
                     color="primary"
                     text
-                    @click="login()"
+                    @click.stop="login()"
                   >Login</v-btn>
                 </v-card-actions>
               </v-tab-item>
@@ -78,7 +78,7 @@
                       required
                       :append-icon="showRegisterPass ? 'mdi-eye' : 'mdi-eye-off'"
                       :type="showRegisterPass ? 'text' : 'password'"
-                      @click:append="showRegisterPass = !showRegisterPass"
+                      @click:append.stop="showRegisterPass = !showRegisterPass"
                       :error-messages="registerPasswordErrors"
                     ></v-text-field>
                     <v-text-field
@@ -87,7 +87,7 @@
                       required
                       :append-icon="showRegisterConfirmPass ? 'mdi-eye' : 'mdi-eye-off'"
                       :type="showRegisterConfirmPass ? 'text' : 'password'"
-                      @click:append="showRegisterConfirmPass = !showRegisterConfirmPass"
+                      @click:append.stop="showRegisterConfirmPass = !showRegisterConfirmPass"
                       :error-messages="registerConfirmPasswordErrors"
                     ></v-text-field>
                   </v-container>
@@ -97,7 +97,7 @@
                   <v-btn
                     color="primary"
                     text
-                    @click="register()"
+                    @click.stop="register()"
                   >Register</v-btn>
                 </v-card-actions>
               </v-tab-item>
@@ -239,7 +239,7 @@ export default {
         }).then((res) => {
           localStorage.token = res.token;
           this.loading = false;
-          this.$router.push('/dashboard');
+          this.$router.push({ name: 'home' });
         }).catch((err) => {
           this.loading = false;
           this.alertBox.context = err.message
@@ -271,7 +271,7 @@ export default {
         }).then((result) => {
           localStorage.token = result.token;
           this.loading = false;
-          this.$router.push('/dashboard');
+          this.$router.push({ name: 'home' });
         }).catch((err) => {
           this.loading = false;
           this.alertBox.context = err.message

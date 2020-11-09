@@ -61,6 +61,7 @@ const list = async (req, res) => {
   if (req.body.onlyUnread) {
     query.read = false;
   }
+  console.log(query);
   const foundDates = await notifications.find(query);
   res.json(foundDates);
 };
