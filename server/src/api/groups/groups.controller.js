@@ -88,7 +88,9 @@ const updateGroup = async (req, res, next) => {
               type: 'acceptedGroupInvite',
               data: {
                 group: group._id.toString(),
+                group_title: group.title,
                 user: req.user._id,
+                username: req.user.username,
               },
               user: group.admin,
               read: false,

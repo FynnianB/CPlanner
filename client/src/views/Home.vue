@@ -1,9 +1,10 @@
 <template>
   <v-app>
     <v-main>
-      <v-btn  v-if="!calendar" @click.stop="enableNavDrawer" elevation="2" outlined>toggle NavBar</v-btn>
+      <v-btn  v-if="activePage === 'groups'" @click.stop="enableNavDrawer" elevation="2" outlined>toggle NavBar</v-btn>
       <NavBar />
-      <Calendar v-if="calendar"/>
+      <Calendar v-if="activePage === 'calendar'"/>
+      <Notifications v-if="activePage === 'notifications'"/>
     </v-main>
   </v-app>
 </template>
@@ -11,14 +12,12 @@
 <script>
 import Calendar from '@/components/Calendar';
 import NavBar from '@/components/NavBar';
+import Notifications from '@/components/Notifications';
 
 export default {
   name: 'Home',
 
   computed: {
-    calendar () {
-      return this.$store.state.activePage === 'calendar'
-    },
     activePage () {
       return this.$store.state.activePage
     },
@@ -26,6 +25,7 @@ export default {
   components: {
     Calendar,
     NavBar,
+    Notifications,
   },
   methods: {
     enableNavDrawer () {

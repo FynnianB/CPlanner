@@ -1,56 +1,57 @@
 <template>
   <v-row class="fill-height main-row ma-0">
-    <v-col class="d-flex flex-column flex-column pa-0">
+    <v-col class="d-flex flex-column pa-0">
 
       <!-- Menubar -->
 
-      <v-sheet height="64">
-        <v-toolbar flat>
-          <v-btn fab text color="grey darken-2" @click.stop="enableNavDrawer">
-            <v-icon>
-              mdi-menu
-            </v-icon>
-          </v-btn>
-          <v-btn outlined class="mr-4 ml-4" color="grey darken-2" @click.stop="setToday">
-            Heute
-          </v-btn>
-          <v-btn fab text small color="grey darken-2" @click.stop="prev">
-            <v-icon small>
-              mdi-chevron-left
-            </v-icon>
-          </v-btn>
-          <v-btn fab text small color="grey darken-2" @click.stop="next">
-            <v-icon small>
-              mdi-chevron-right
-            </v-icon>
-          </v-btn>
-          <v-toolbar-title v-if="$refs.calendar" class="mr-4">
-            {{ $refs.calendar.title }}
-          </v-toolbar-title>
-          <v-spacer></v-spacer>
-          <v-menu bottom right>
-            <template v-slot:activator="{ on, attrs }">
-              <v-btn outlined color="grey darken-2" v-bind="attrs" v-on="on">
-                <span>{{ typeToLabel[type] }}</span>
-                <v-icon right>
-                  mdi-menu-down
-                </v-icon>
-              </v-btn>
-            </template>
-            <v-list>
-              <v-list-item @click="type = 'month'">
-                <v-list-item-title>Monat</v-list-item-title>
-              </v-list-item>
-              <v-list-item @click="type = 'week'">
-                <v-list-item-title>Woche</v-list-item-title>
-              </v-list-item>
-              <v-list-item @click="type = 'day'">
-                <v-list-item-title>Tag</v-list-item-title>
-              </v-list-item>
-            </v-list>
-          </v-menu>
-        </v-toolbar>
-      </v-sheet>
+      <v-toolbar max-height="64">
+        <v-btn fab text color="grey darken-2" @click.stop="enableNavDrawer">
+          <v-icon>
+            mdi-menu
+          </v-icon>
+        </v-btn>
+        <v-btn outlined class="mr-4 ml-4" color="grey darken-2" @click.stop="setToday">
+          Heute
+        </v-btn>
+        <v-btn fab text small color="grey darken-2" @click.stop="prev">
+          <v-icon small>
+            mdi-chevron-left
+          </v-icon>
+        </v-btn>
+        <v-btn fab text small color="grey darken-2" @click.stop="next">
+          <v-icon small>
+            mdi-chevron-right
+          </v-icon>
+        </v-btn>
+        <v-toolbar-title v-if="$refs.calendar" class="mr-4">
+          {{ $refs.calendar.title }}
+        </v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-icon size="30" class="mr-4" @click.stop="refresh">
+          mdi-refresh
+        </v-icon>
+        <v-menu bottom right>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn outlined color="grey darken-2" v-bind="attrs" v-on="on">
+              <span>{{ typeToLabel[type] }}</span>
+              <v-icon right>
+                mdi-menu-down
+              </v-icon>
+            </v-btn>
+          </template>
+          <v-list>
+            <v-list-item @click="type = 'month'">
+              <v-list-item-title>Monat</v-list-item-title>
+            </v-list-item>
+            <v-list-item @click="type = 'week'">
+              <v-list-item-title>Woche</v-list-item-title>
+            </v-list-item>
+            <v-list-item @click="type = 'day'">
+              <v-list-item-title>Tag</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+      </v-toolbar>
       
       <!-- Calendar -->
 
@@ -70,6 +71,10 @@
           @click:date="viewDay"
           @click:day="createEvent"
           @change="updateRange"
+          v-touch="{
+            left: () => prev(),
+            right: () => next()
+          }"
         ></v-calendar>
         <v-btn
           color="primary"
@@ -674,6 +679,11 @@ export default {
     },
   },
   methods: {
+    refresh () {
+      this.resetCreateDialog()
+      this.events = []
+      this.updateRange({ start: this.start, end: this.end })
+    },
     enableNavDrawer () {
       this.$store.commit('setNavDrawer',true)
     },

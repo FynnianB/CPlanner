@@ -11,6 +11,7 @@ router.put('/', middlewares.validateDate(), middlewares.formatDates, controller.
 router.patch('/:dateId',
   middlewares.validateId,
   middlewares.dateExists,
+  middlewares.groupExists,
   middlewares.validatePatchableDate(),
   middlewares.isDateCreator,
   middlewares.formatDates,
@@ -18,6 +19,7 @@ router.patch('/:dateId',
 router.delete('/:dateId',
   middlewares.validateId,
   middlewares.dateExists,
+  middlewares.groupExists,
   middlewares.isDateCreator,
   controller.deleteDate);
 

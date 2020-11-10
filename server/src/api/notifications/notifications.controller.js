@@ -1,11 +1,12 @@
 const {
-  notifications, invites, userGroups, dates,
+  notifications, invites, userGroups, dates, groups,
 } = require('./notifications.model');
 
 async function setInviteToDate(inviteId) {
   let err = '';
   try {
     const invite = await invites.findOne({ _id: inviteId });
+    const group = await groups.findOne({ _id: invite.group });
     let groupMembers;
     if (invite.users) {
       groupMembers = await userGroups.find({ group: invite.group, user: { $nin: invite.users } });
@@ -31,6 +32,8 @@ async function setInviteToDate(inviteId) {
                 invite_id: inviteId,
                 date_id: insertedDate._id.toString(),
                 date_title: insertedDate.title,
+                date_date: insertedDate.from,
+                group_title: group.title,
               },
               user: member.user,
               read: false,

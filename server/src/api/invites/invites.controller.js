@@ -1,11 +1,12 @@
 const {
-  userInvites, userGroups, invites, dates, notifications,
+  userInvites, userGroups, invites, dates, notifications, groups,
 } = require('./invites.model');
 
 async function setInviteToDate(inviteId) {
   let err = '';
   try {
     const invite = await invites.findOne({ _id: inviteId });
+    const group = await groups.findOne({ _id: invite.group });
     let groupMembers;
     if (invite.users) {
       groupMembers = await userGroups.find({ group: invite.group, user: { $nin: invite.users } });
@@ -31,6 +32,8 @@ async function setInviteToDate(inviteId) {
                 invite_id: inviteId,
                 date_id: insertedDate._id.toString(),
                 date_title: insertedDate.title,
+                date_date: insertedDate.from,
+                group_title: group.title,
               },
               user: member.user,
               read: false,
@@ -156,6 +159,8 @@ const answerInvite = async (req, res, next) => {
             invite_id: req.params.inviteId,
             invite_title: updatedInvite.title,
             acceptingUser: req.user._id,
+            acceptingUsername: req.user.username,
+            acceptsLeft: updatedInvite.acceptsLeft,
           },
           user: updatedInvite.creator,
           read: false,
@@ -192,6 +197,7 @@ const answerInvite = async (req, res, next) => {
         invite_id: req.params.inviteId,
         invite_title: invite.title,
         decliningUser: req.user._id,
+        decliningUsername: req.user._id,
       },
       user: invite.creator,
       read: false,

@@ -21,6 +21,8 @@ async function patchGroupDate(req) {
             data: {
               date_id: updatedDate._id.toString(),
               date_title: updatedDate.title,
+              date_date: updatedDate.from,
+              date_group: req.group.title,
             },
             user: date.user_id,
             read: false,
@@ -59,6 +61,8 @@ async function deleteGroupDate(req) {
             data: {
               date_id: date._id.toString(),
               date_title: date.title,
+              date_date: date.from,
+              date_group: req.group.title,
             },
             user: date.user_id,
             read: false,

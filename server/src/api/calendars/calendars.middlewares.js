@@ -4,7 +4,7 @@ const {
   patchSchema,
   zoneSchema,
 } = require('./calendars.schema');
-const { dates } = require('./calendars.model');
+const { dates, groups } = require('./calendars.model');
 
 const validateDate = (defaultErrorMessage) => (req, res, next) => {
   const result = schema.validate(req.body);
@@ -61,6 +61,17 @@ const dateExists = async (req, res, next) => {
   }
 };
 
+const groupExists = async (req, res, next) => {
+  const group = await groups.findOne({ _id: req.date._id });
+  if (group) {
+    req.group = group;
+    next();
+  } else {
+    res.status(422);
+    next(new Error('Group not found'));
+  }
+};
+
 const isDateCreator = async (req, res, next) => {
   if (req.date.group && req.date.creator) {
     if (req.date.creator === req.user._id) {
@@ -92,4 +103,5 @@ module.exports = {
   validatePatchableDate,
   formatDates,
   validateDateZone,
+  groupExists,
 };
