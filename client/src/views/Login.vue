@@ -8,6 +8,7 @@
             ref="form"
             elevation="3"
             width="500px"
+            :max-width="maxWidth"
             outlined
             :loading="loading"
           >
@@ -179,6 +180,9 @@ export default {
     },
   }),
   computed: {
+    maxWidth () {
+      return window.innerWidth*0.8
+    },
     registerUsernameErrors () {
       const errors = []
       if (!this.$v.registerUser.username.$dirty) return errors

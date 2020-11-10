@@ -27,7 +27,7 @@
           {{ $refs.calendar.title }}
         </v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-icon size="30" class="mr-4" @click.stop="refresh">
+        <v-icon size="25" class="mr-4" @click.stop="refresh">
           mdi-refresh
         </v-icon>
         <v-menu bottom right>

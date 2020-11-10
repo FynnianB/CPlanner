@@ -14,16 +14,16 @@
           Mitteilungen
         </v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-icon size="30" class="mr-4" @click.stop="refresh">
+        <v-icon size="25" class="mr-4" @click.stop="refresh">
           mdi-refresh
         </v-icon>
       </v-toolbar>
 
       <v-row class="fill-height ma-0">
         <v-col class="d-flex flex-column pa-0">
-          <v-sheet elevation="2" outlined class="align-self-center mt-16" width="500">
+          <v-sheet elevation="2" outlined class="align-self-center mt-16" width="500" :max-width="maxWidth">
             <v-toolbar>
-              <v-badge color="primary" dot overlap bordered offset-x="3" offset-y="12" v-if="unread > 0">
+              <v-badge color="primary" dot overlap bordered offset-x="3" offset-y="12" v-if="unreadNotes.length > 0">
                 <v-toolbar-title>
                     Ungelesene Mitteilungen
                 </v-toolbar-title>
@@ -33,7 +33,7 @@
               </v-toolbar-title>
             </v-toolbar>
 
-            <v-list max-height="600" class="overflow-y-auto" three-line>
+            <v-list max-height="600" class="overflow-y-auto" three-line v-if="unreadNotes.length > 0">
               <template v-for="(note, index) in unreadNotes">
                 <v-list-item :key="note._id">
                   <v-list-item-content>
@@ -57,18 +57,23 @@
                 <v-divider v-if="index < unreadNotes.length-1" :key="index"></v-divider>
               </template>
             </v-list>
+            <v-list-item v-else>
+              <v-list-item-content three-line>
+                <v-list-item-title class="font-weight-light text-center py-3">Keine ungelesene Mitteilungen</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
           </v-sheet>
         </v-col>
 
         <v-col class="d-flex flex-column pa-0">
-          <v-sheet elevation="2" outlined class="align-self-center mt-16" width="500">
+          <v-sheet elevation="2" outlined class="align-self-center mt-16" width="500" :max-width="maxWidth">
             <v-toolbar>
               <v-toolbar-title>
                   Alle Mitteilungen
               </v-toolbar-title>
             </v-toolbar>
 
-            <v-list max-height="600" class="overflow-y-auto" three-line>
+            <v-list max-height="600" class="overflow-y-auto" three-line v-if="notes.length > 0">
               <template v-for="(note, index) in notes">
                 <v-list-item :key="note._id">
                   <v-list-item-content>
@@ -78,9 +83,14 @@
                   </v-list-item-content>
                 </v-list-item>
 
-                <v-divider v-if="index < unreadNotes.length-1" :key="index"></v-divider>
+                <v-divider v-if="index < notes.length-1" :key="index"></v-divider>
               </template>
             </v-list>
+            <v-list-item v-else>
+              <v-list-item-content three-line>
+                <v-list-item-title class="font-weight-light text-center py-3">Keine ungelesene Mitteilungen</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
           </v-sheet>
         </v-col>
       </v-row>
@@ -92,9 +102,13 @@
 export default {
   data: () => ({
     notes: [],
-    unreadNotes: [],
-    unread: 0
+    unreadNotes: []
   }),
+  computed : {
+    maxWidth () {
+      return window.innerWidth*0.8
+    },
+  },
   mounted(){
     this.getNotes()
   },
@@ -166,7 +180,6 @@ export default {
           allNotes.push(note)
 
         });
-        this.unread = unreadNotes.length
         this.notes = allNotes
         this.unreadNotes = unreadNotes
       });
