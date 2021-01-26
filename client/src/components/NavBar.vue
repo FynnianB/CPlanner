@@ -34,12 +34,31 @@
           </v-list-item-content>
         </v-list-item>
 
+        <v-list-item value="disabled">
+          <v-list-item-icon>
+            <!-- <v-icon>mdi-calendar-remove-outline</v-icon> -->
+            <v-icon>mdi-close-circle-outline</v-icon>
+          </v-list-item-icon>
+          <v-list-item-content>
+            <v-list-item-title>Gesperrte Tage</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+
         <v-list-item value="groups">
           <v-list-item-icon>
             <v-icon>mdi-account-multiple</v-icon>
           </v-list-item-icon>
           <v-list-item-content>
             <v-list-item-title>Gruppen</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+
+        <v-list-item value="invites">
+          <v-list-item-icon>
+            <v-icon>mdi-email-outline</v-icon>
+          </v-list-item-icon>
+          <v-list-item-content>
+            <v-list-item-title>Einladungen</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
 
@@ -123,6 +142,10 @@ export default {
         },
       }).then(res => res.json())
       .then(notes => {
+        // Token expired?
+        if (notes.message && notes.message === 'Token expired') {
+          this.logout();
+        }
         let counter = 0
         notes.forEach(note => {
           if(!note.read) {

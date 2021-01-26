@@ -1,4 +1,6 @@
-const { schema, answerSchema, idSchema } = require('./invites.schema');
+const {
+  schema, answerSchema, idSchema, dateSchema,
+} = require('./invites.schema');
 const {
   groups, userGroups, users, userInvites,
 } = require('./invites.model');
@@ -80,6 +82,16 @@ const validateId = (req, res, next) => {
   }
 };
 
+const validateDate = (req, res, next) => {
+  const result = dateSchema.validate(req.body);
+  if (!result.error) {
+    next();
+  } else {
+    res.status(422);
+    next(result.error);
+  }
+};
+
 module.exports = {
   validateInserts,
   existsInputs,
@@ -87,4 +99,5 @@ module.exports = {
   inviteExists,
   userAllowed,
   validateId,
+  validateDate,
 };

@@ -39,6 +39,7 @@
                       :append-icon="showLoginPass ? 'mdi-eye' : 'mdi-eye-off'"
                       :type="showLoginPass ? 'text' : 'password'"
                       @click:append.stop="showLoginPass = !showLoginPass"
+                      @keydown.enter="login()"
                     ></v-text-field>
                     <v-checkbox
                       v-model="loginUser.rememberMe"

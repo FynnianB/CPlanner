@@ -62,13 +62,17 @@ const dateExists = async (req, res, next) => {
 };
 
 const groupExists = async (req, res, next) => {
-  const group = await groups.findOne({ _id: req.date._id });
-  if (group) {
-    req.group = group;
-    next();
+  if (req.date.group && req.date.creator) {
+    const group = await groups.findOne({ _id: req.date.group });
+    if (group) {
+      req.group = group;
+      next();
+    } else {
+      res.status(422);
+      next(new Error('Group not found'));
+    }
   } else {
-    res.status(422);
-    next(new Error('Group not found'));
+    next();
   }
 };
 

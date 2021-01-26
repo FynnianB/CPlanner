@@ -103,13 +103,13 @@
               <v-toolbar-title v-html="selectedEvent.name"></v-toolbar-title>
               <v-spacer></v-spacer>
               <v-btn
-                v-if="currentlyEditing !== selectedEvent._id"
+                v-if="currentlyEditing !== selectedEvent._id && selectedEvent.editable"
                 icon
                 @click.stop="editEvent(selectedEvent)">
                 <v-icon>mdi-pencil</v-icon>
               </v-btn>
               <v-btn
-                v-else
+                v-if="currentlyEditing === selectedEvent._id && selectedEvent.editable"
                 icon
                 @click.stop="saveEvent(selectedEvent)">
                 <v-icon>mdi-content-save</v-icon>
@@ -148,6 +148,10 @@
                   v-if="selectedEvent.timed && selectedEvent.start !== selectedEvent.end"
                   v-html="' - '+selectedEvent.end.toLocaleTimeString('de-DE', {hour: '2-digit', minute:'2-digit'})+' Uhr'">
                 </span>
+              </v-col>
+              <v-col v-if="selectedEvent.group_title">
+                <v-icon class="mr-1">mdi-account-multiple</v-icon>
+                <span v-html="selectedEvent.group_title"></span>
               </v-col>
               <v-col v-if="selectedEvent.location">
                 <v-icon class="mr-1">mdi-map-marker-outline</v-icon>
@@ -575,6 +579,7 @@ import dayjs from 'dayjs'
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'
 import { validationMixin } from 'vuelidate'
 import { required, maxLength } from 'vuelidate/lib/validators'
+import jwt from 'jsonwebtoken'
 
 dayjs.extend(isSameOrAfter)
 
@@ -660,7 +665,7 @@ export default {
       const errors = []
       if (!this.$v.creatingEvent.dates.$dirty) return errors
       !this.$v.creatingEvent.dates[0].required && errors.push('Der Tag ist erforderlich.')
-      !this.$v.creatingEvent.dates[1].minDate && errors.push('Der Start des Termins muss vor dem Ende liegen.')
+      !this.$v.creatingEvent.dates[1].minCreateDate && errors.push('Der Start des Termins muss vor dem Ende liegen.')
       return errors
     },
     editNameErrors () {
@@ -674,7 +679,7 @@ export default {
       const errors = []
       if (!this.$v.selectedEvent.dates.$dirty) return errors
       !this.$v.selectedEvent.dates[0].required && errors.push('Der Tag ist erforderlich.')
-      !this.$v.selectedEvent.dates[1].minDate && errors.push('Der Start des Termins muss vor dem Ende liegen.')
+      !this.$v.selectedEvent.dates[1].minEditDate && errors.push('Der Start des Termins muss vor dem Ende liegen.')
       return errors
     },
   },
@@ -827,7 +832,7 @@ export default {
           }),
         }).then(res => res.json())
         .then(res => {
-          if (res.message) {
+          if (res.message && res.message !== 'Dates updated. Notifications send') {
             this.eventAlertBox.type = 'error'
             switch (res.message) {
               case '"title" is not allowed to be empty':
@@ -848,6 +853,9 @@ export default {
                 break
               case '"to" must be greater than or equal to "ref:from"':
                 this.eventAlertBox.context = 'Der Start darf nicht vor dem Ende liegen'
+                break
+              case 'Only the creator can modify the date':
+                this.eventAlertBox.context = 'Nur den Ersteller von dem Gruppentermin kann diesen bearbeiten'
                 break
               default:
                 this.eventAlertBox.context = 'Beim Speichern ist ein Fehler aufgetreten'
@@ -874,7 +882,11 @@ export default {
       .then(res => {
         if (res.message && res.message !== 'Date deleted') {
           this.eventAlertBox.type = 'error'
-          this.eventAlertBox.context = 'Beim Löschen ist ein Fehler aufgetreten'
+          if (res.message === 'Only the creator can modify the date') {
+            this.eventAlertBox.context = 'Nur den Ersteller von dem Gruppentermin kann diesen löschen'
+          } else {
+            this.eventAlertBox.context = 'Beim Löschen ist ein Fehler aufgetreten'
+          }
           this.eventAlertBox.enabled = true
         } else {
           this.selectedOpen = false
@@ -952,6 +964,16 @@ export default {
           }
           if (event.start.getHours()===0&&event.start.getMinutes()===0&&event.end.getHours()===0&&event.end.getMinutes()===0) {
             event.timed = false;
+          }
+          event.editable = true
+          if (row.group) {
+            event.group = row.group
+            event.creator = row.creator
+            event.group_title = row.group_title
+            event.color = 'calendarGroup'
+            if (event.creator !== jwt.decode(localStorage.token)._id) {
+              event.editable = false
+            }
           }
           return event;
         });

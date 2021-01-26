@@ -1,5 +1,6 @@
+const dayjs = require('dayjs');
 const {
-  userInvites, userGroups, invites, dates, notifications, groups,
+  userInvites, userGroups, invites, dates, notifications, groups, users, groupInvites, disabled
 } = require('./invites.model');
 
 async function setInviteToDate(inviteId) {
@@ -66,7 +67,35 @@ const list = async (req, res) => {
   const foundInvites = await userInvites.find({
     user: req.user._id,
   });
-  res.json(foundInvites);
+  const returnInvites = [];
+  if (foundInvites.length > 0) {
+    await new Promise((resolve, reject) => {
+      foundInvites.forEach(async (invite, i, array) => {
+        const inviteInfo = await invites.findOne({ _id: invite.invite });
+        const groupInfo = await groups.findOne({ _id: inviteInfo.group });
+        if (!inviteInfo.error && !groupInfo.error) {
+          inviteInfo.group_title = groupInfo.title;
+          inviteInfo.type = 'event';
+          returnInvites.push(inviteInfo);
+        }
+        if (array.length - 1 === i) resolve();
+      });
+    });
+  }
+  const foundGroupInvites = await groupInvites.find({ user: req.user._id });
+  if (foundGroupInvites.length > 0) {
+    await new Promise((resolve, reject) => {
+      foundGroupInvites.forEach(async (invite, i, array) => {
+        const groupInfo = await groups.findOne({ _id: invite.group });
+        if (!groupInfo.error) {
+          groupInfo.type = 'group';
+          returnInvites.push(groupInfo);
+        }
+        if (array.length - 1 === i) resolve();
+      });
+    });
+  }
+  res.json(returnInvites);
 };
 
 const getItem = async (req, res, next) => {
@@ -93,6 +122,8 @@ const insertInvite = async (req, res, next) => {
         creator: req.user._id,
         acceptsLeft: foundMembers.length,
       };
+      invite.from = dayjs(invite.from, 'YYYY-MM-DD').$d;
+      invite.to = dayjs(invite.to, 'YYYY-MM-DD').$d;
       const foundInvite = await invites.findOne(invite);
       if (!foundInvite) {
         invite.created = Date.now();
@@ -123,7 +154,7 @@ const insertInvite = async (req, res, next) => {
         if (newInvite) {
           res.json(insertedInvite);
         } else {
-          res.json({ message: 'Invites already exists' });
+          res.json({ message: 'Invite already exists' });
         }
       } else {
         res.json({ message: 'Invite already exists' });
@@ -197,7 +228,7 @@ const answerInvite = async (req, res, next) => {
         invite_id: req.params.inviteId,
         invite_title: invite.title,
         decliningUser: req.user._id,
-        decliningUsername: req.user._id,
+        decliningUsername: req.user.username,
       },
       user: invite.creator,
       read: false,
@@ -205,12 +236,59 @@ const answerInvite = async (req, res, next) => {
     const insertedNote = await notifications.insert(note);
     if (insertedNote.error) {
       res.status(500);
-      const err = new Error('Dates inserted. Notifications failed');
+      const err = new Error('Notifications failed');
       next(err);
     } else {
-      resultStr += ' Dates inserted. Notifications send';
+      resultStr += ' Notifications send';
       res.json({ message: resultStr });
     }
+  }
+};
+
+const getUnavailable = async (req, res, next) => {
+  const foundMembers = await userGroups.find({ group: req.body.group });
+  if (foundMembers.length > 0) {
+    try {
+      const unavailableMembers = [];
+      await new Promise((resolve, reject) => {
+        foundMembers.forEach(async (member, i, array) => {
+          const foundDate = await dates.findOne({
+            user_id: member.user,
+            $or: [
+              { from: { $gte: new Date(req.body.from), $lte: new Date(req.body.to) } },
+              { to: { $gte: new Date(req.body.from), $lte: new Date(req.body.to) } },
+              {
+                $and: [
+                  { from: { $lte: new Date(req.body.from) } },
+                  { to: { $gte: new Date(req.body.to) } },
+                ],
+              },
+            ],
+          });
+          const foundDisabled = await disabled.findOne({
+            user_id: member.user,
+            date: { $gte: new Date(req.body.from), $lte: new Date(req.body.to) },
+          });
+          const memberInfo = await users.findOne({ _id: member.user });
+          if (!memberInfo.error) {
+            if (foundDate || foundDisabled) {
+              unavailableMembers.push({ _id: memberInfo._id, username: memberInfo.username });
+            }
+          } else {
+            throw new Error('Getting user information failed');
+          }
+          if (array.length - 1 === i) resolve();
+        });
+      });
+      res.json(unavailableMembers);
+    } catch (error) {
+      res.status(500);
+      next(error);
+    }
+  } else {
+    res.status(422);
+    const err = new Error('No members in the group');
+    next(err);
   }
 };
 
@@ -219,4 +297,5 @@ module.exports = {
   insertInvite,
   answerInvite,
   getItem,
+  getUnavailable,
 };

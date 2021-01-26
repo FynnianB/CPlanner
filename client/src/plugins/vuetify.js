@@ -18,7 +18,8 @@ export default new Vuetify({
         info: '#2196F3',
         success: '#4CAF50',
         warning: '#FFC107',
-        calendar: '#3f51b5'
+        calendar: '#3f51b5',
+        calendarGroup: '#A33FB5'
       },
     },
   },

@@ -1,5 +1,5 @@
 const {
-  schema, groupSchema, roleSchema, idSchema,
+  schema, groupSchema, roleSchema, idSchema, usernameSchema,
 } = require('./groups.schema');
 const { users, groups, userGroups } = require('./groups.model');
 
@@ -95,6 +95,22 @@ const isGroupAdmin = async (req, res, next) => {
   }
 };
 
+const isGroupModerator = async (req, res, next) => {
+  try {
+    const group = await groups.findOne({ _id: req.params.groupId });
+    const foundUserGroup = await userGroups.findOne({ user: req.user._id, group: req.params.groupId, role: 'admin' });
+    if (group.admin === req.user._id || foundUserGroup) {
+      next();
+    } else {
+      res.status(401);
+      throw new Error('Unauthorized');
+    }
+  } catch (err) {
+    res.status(res.statusCode === 200 ? 422 : res.statusCode);
+    next(err);
+  }
+};
+
 const isParamNotGroupAdmin = async (req, res, next) => {
   try {
     const group = await groups.findOne({ _id: req.params.groupId });
@@ -110,9 +126,10 @@ const isParamNotGroupAdmin = async (req, res, next) => {
   }
 };
 
-const isUserInGroup = (ifStatement, defError = 'Unable to proceed') => async (req, res, next) => {
+const isUserInGroup = (ifStatement, defError = 'Unable to proceed', userInParam = true) => async (req, res, next) => {
   try {
-    const foundUser = await userGroups.findOne({ user: req.params.userId, group: req.params.groupId });
+    const userId = userInParam ? req.params.userId : req.body.user._id;
+    const foundUser = await userGroups.findOne({ user: userId.toString(), group: req.params.groupId });
     if (ifStatement(foundUser)) {
       next();
     } else {
@@ -140,12 +157,28 @@ const isInGroup = (ifStatement, defError = 'Unable to proceed') => async (req, r
   }
 };
 
+const validateUsername = (req, res, next) => {
+  const result = usernameSchema.validate(req.body);
+  if (!result.error) {
+    next();
+  } else {
+    res.status(422);
+    next(result.error);
+  }
+};
+
 const validateUserAndGroup = async (req, res, next) => {
   try {
-    const foundUser = await users.findOne({ _id: req.params.userId, active: true });
+    const foundUser = await users.findOne({ username: new RegExp(`^${req.body.username}$`, 'i'), active: true });
     const foundGroup = await groups.findOne({ _id: req.params.groupId });
-    if (foundUser && foundGroup) {
-      next();
+    if (foundGroup) {
+      if (foundUser) {
+        req.body.user = foundUser;
+        next();
+      } else {
+        res.status(422);
+        throw new Error('User not found');
+      }
     } else {
       res.status(422);
       throw new Error('Unable to fetch inputs');
@@ -168,4 +201,6 @@ module.exports = {
   validateUserAndGroup,
   validateId,
   isInGroup,
+  validateUsername,
+  isGroupModerator,
 };

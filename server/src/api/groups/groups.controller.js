@@ -1,10 +1,35 @@
 const {
-  groupInvites, groups, userGroups, notifications,
+  groupInvites, groups, userGroups, notifications, users,
 } = require('./groups.model');
 
 const getItem = async (req, res, next) => {
   const group = await groups.findOne({ _id: req.params.groupId });
   if (group) {
+    const members = [];
+    const foundUserInGroup = await userGroups.find({ group: req.params.groupId });
+    if (foundUserInGroup && foundUserInGroup.length > 0) {
+      await new Promise((resolve, reject) => {
+        foundUserInGroup.forEach(async (entry, i, array) => {
+          const userInfo = await users.findOne({ _id: entry.user, active: true });
+          if (userInfo) {
+            if (entry.user === group.admin) {
+              group.adminUsername = userInfo.username;
+            }
+            const member = {
+              memberId: userInfo._id,
+              memberUsername: userInfo.username,
+              memberRole: entry.role,
+            };
+            if (member.memberRole === 'admin' && group.admin !== member.memberId.toString()) {
+              member.memberRole = 'moderator';
+            }
+            members.push(member);
+          }
+          if (array.length - 1 === i) resolve();
+        });
+      });
+    }
+    group.members = members;
     res.json(group);
   } else {
     res.status(422);
@@ -12,7 +37,7 @@ const getItem = async (req, res, next) => {
   }
 };
 
-async function addUserToGroup(userId, groupId, userRole = 'member') {
+async function addUserToGroup(userId, groupId, userRole) {
   try {
     const foundGroup = await groups.findOne({ _id: groupId });
     if (foundGroup && !foundGroup.error) {
@@ -80,14 +105,14 @@ const updateGroup = async (req, res, next) => {
       if (!foundUserInGroup) {
         const foundInvite = await groupInvites.findOne({ user: req.user._id, group: req.params.groupId });
         if (foundInvite) {
-          const result = await addUserToGroup(req.user._id, req.params.groupId);
+          const result = await addUserToGroup(req.user._id, req.params.groupId, 'member');
           await groupInvites.findOneAndDelete({ user: req.user._id, group: req.params.groupId });
           if (!result.error) {
             const group = await groups.findOne({ _id: result.group });
             const note = {
               type: 'acceptedGroupInvite',
               data: {
-                group: group._id.toString(),
+                group_id: group._id.toString(),
                 group_title: group.title,
                 user: req.user._id,
                 username: req.user.username,
@@ -98,8 +123,9 @@ const updateGroup = async (req, res, next) => {
             const insertedNote = await notifications.insert(note);
             if (insertedNote.error) {
               res.status(500);
-              next(new Error('Dates inserted. Notifications failed'));
+              next(new Error('User inserted into Group. Notifications failed'));
             } else {
+              result.message = 'User inserted into Group. Notifications send';
               res.json(result);
             }
           } else {
@@ -131,8 +157,8 @@ const updateGroup = async (req, res, next) => {
             const note = {
               type: 'deniedGroupInvite',
               data: {
-                group: group._id.toString(),
-                groupTitle: group.title,
+                group_id: group._id.toString(),
+                group_title: group.title,
                 user: req.user._id,
                 username: req.user.username,
               },
@@ -188,7 +214,25 @@ const deleteGroup = async (req, res) => {
 const updateUser = async (req, res, next) => {
   if (req.body.delete) {
     await userGroups.findOneAndDelete({ user: req.params.userId, group: req.params.groupId });
-    res.json({ message: 'User kicked from Group' });
+    const group = await groups.findOne({ _id: req.params.groupId });
+    const note = {
+      type: 'userKickedOutOfGroup',
+      data: {
+        group_id: group._id.toString(),
+        group_title: group.title,
+        kicker_id: req.user._id.toString(),
+        kicker_username: req.user.username,
+      },
+      user: req.params.userId,
+      read: false,
+    };
+    const insertedNote = await notifications.insert(note);
+    if (insertedNote.error) {
+      res.status(500);
+      next(new Error('User kicked from Group. Notifications failed'));
+    } else {
+      res.json({ message: 'User kicked from Group' });
+    }
   } else {
     const foundAndUpdatedUser = await userGroups.findOneAndUpdate({ user: req.params.userId, group: req.params.groupId }, {
       $set: req.body,
@@ -200,7 +244,7 @@ const updateUser = async (req, res, next) => {
 const inviteUser = async (req, res, next) => {
   try {
     const invite = {
-      user: req.params.userId,
+      user: req.body.user._id.toString(),
       group: req.params.groupId,
     };
     const foundInvite = await groupInvites.findOne(invite);

@@ -1,4 +1,4 @@
-const { dates, notifications } = require('./calendars.model');
+const { dates, notifications, groups } = require('./calendars.model');
 
 async function patchGroupDate(req) {
   let err = '';
@@ -92,6 +92,17 @@ const list = async (req, res) => {
       { to: { $gte: new Date(req.body.from), $lte: new Date(req.body.to) } },
     ],
   });
+  if (foundDates.length > 0) {
+    await new Promise((resolve, reject) => {
+      foundDates.forEach(async (date, i, array) => {
+        if (date.group) {
+          const group = await groups.findOne({ _id: date.group });
+          foundDates[i].group_title = group.title;
+        }
+        if (array.length - 1 === i) resolve();
+      });
+    });
+  }
   res.json(foundDates);
 };
 
@@ -129,6 +140,7 @@ const patchDate = async (req, res, next) => {
     if (!updatedDate.error) {
       res.json(updatedDate);
     } else {
+      res.status(500);
       next(new Error(updatedDate.error));
     }
   }

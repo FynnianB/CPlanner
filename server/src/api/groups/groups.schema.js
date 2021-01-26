@@ -18,9 +18,15 @@ const idSchema = Joi.object({
   groupId: Joi.string().trim().length(24).required(),
 });
 
+const usernameSchema = Joi.object({
+  username: Joi.string().pattern(new RegExp('^[a-zA-Z0-9_-]+$')).min(5).max(30)
+    .required(),
+});
+
 module.exports = {
   schema,
   groupSchema,
   roleSchema,
   idSchema,
+  usernameSchema,
 };

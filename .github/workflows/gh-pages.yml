@@ -12,7 +12,7 @@ jobs:
         with:
           persist-credentials: false 
 
-      - name: Install and Build 🔧
+      - name: Install and Build
         run: |
           cd client
           npm install
@@ -20,7 +20,7 @@ jobs:
         env:
           VUE_APP_API_KEY: ${{ secrets.VUE_APP_API_KEY }}
 
-      - name: Deploy 🚀
+      - name: Deploy
         uses: JamesIves/github-pages-deploy-action@3.6.2
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

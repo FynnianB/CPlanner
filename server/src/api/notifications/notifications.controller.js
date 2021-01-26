@@ -1,5 +1,5 @@
 const {
-  notifications, invites, userGroups, dates, groups,
+  notifications, invites, userGroups, dates, groups, userInvites,
 } = require('./notifications.model');
 
 async function setInviteToDate(inviteId) {
@@ -64,7 +64,6 @@ const list = async (req, res) => {
   if (req.body.onlyUnread) {
     query.read = false;
   }
-  console.log(query);
   const foundDates = await notifications.find(query);
   res.json(foundDates);
 };
@@ -100,55 +99,114 @@ const answerNote = async (req, res, next) => {
     'data.invite_id': req.body.inviteId,
   });
   const invite = await invites.findOne({ _id: req.body.inviteId });
-  // subtract 1 from acceptsLeft
-  let newUsers = [];
-  if (invite.users) {
-    newUsers = invite.users;
-  }
-  newUsers.push(note.data.decliningUser);
-  const updatedInvite = await invites.findOneAndUpdate({ _id: req.body.inviteId }, { $inc: { acceptsLeft: -1 }, $set: { users: newUsers } });
-  if (!updatedInvite.error) {
-    if (updatedInvite.acceptsLeft === 0) {
-      const result = await setInviteToDate(req.body.inviteId);
-      if (result === 'Dates inserted. Notifications send') {
-        resultStr += 'Was the last missing accept. Date inserted. ';
-      } else {
-        res.status(500);
-        next(new Error(result));
+  if (req.body.stay) {
+    // subtract 1 from acceptsLeft
+    let newUsers = [];
+    if (invite.users) {
+      newUsers = invite.users;
+    }
+    newUsers.push(note.data.decliningUser);
+    const updatedInvite = await invites.findOneAndUpdate({ _id: req.body.inviteId }, { $inc: { acceptsLeft: -1 }, $set: { users: newUsers } });
+    if (!updatedInvite.error) {
+      if (updatedInvite.acceptsLeft === 0) {
+        const result = await setInviteToDate(req.body.inviteId);
+        if (result === 'Dates inserted. Notifications send') {
+          resultStr += 'Was the last missing accept. Date inserted. ';
+        } else {
+          res.status(500);
+          next(new Error(result));
+        }
       }
-    }
-    const sendNote = {
-      type: 'stayOnDate',
-      data: {
-        invite_id: req.params.inviteId,
-        invite_title: updatedInvite.title,
-      },
-      user: note.data.decliningUser,
-      read: false,
-    };
-    const insertedNote = await notifications.insert(sendNote);
-    if (insertedNote.error) {
-      res.status(500);
-      const err = new Error('Invite updated. Notifications failed');
-      next(err);
+      const sendNote = {
+        type: 'stayOnDate',
+        data: {
+          invite_id: req.body.inviteId,
+          invite_title: updatedInvite.title,
+          stay: true,
+        },
+        user: note.data.decliningUser,
+        read: false,
+      };
+      const insertedNote = await notifications.insert(sendNote);
+      if (insertedNote.error) {
+        res.status(500);
+        const err = new Error('Invite updated. Notifications failed');
+        next(err);
+      } else {
+        resultStr += 'Invite updated. Notification send. ';
+      }
     } else {
-      resultStr += 'Invite updated. Notification send. ';
+      res.status(500);
+      const err = new Error('An error occured while updating the invite status');
+      next(err);
     }
+    // delete creators deniedNote
+    const deletedInvite = await notifications.findOneAndDelete({ user: req.user._id, _id: req.body.noteId });
+    if (!deletedInvite.error) {
+      resultStr += 'Old notification deleted';
+    } else {
+      res.status(500);
+      const err = new Error('An error occured while deleting the old notification');
+      next(err);
+    }
+    res.json({ message: resultStr });
   } else {
-    res.status(500);
-    const err = new Error('An error occured while updating the invite status');
-    next(err);
+    const deletedUserInvites = await userInvites.remove({ invite: req.body.inviteId });
+    const deletedInvite = await invites.findOneAndDelete({ _id: req.body.inviteId });
+    const deletedNote = await notifications.findOneAndDelete({ user: req.user._id, _id: req.body.noteId });
+    if (!deletedUserInvites.error && !deletedInvite.error && !deletedNote.error) {
+      const sendNote = {
+        type: 'stayOnDate',
+        data: {
+          invite_id: req.body.inviteId,
+          invite_title: invite.title,
+          stay: false,
+        },
+        user: note.data.decliningUser,
+        read: false,
+      };
+      const insertedNote = await notifications.insert(sendNote);
+      const group = await groups.findOne({ _id: invite.group });
+      let groupMembers;
+      if (invite.users) {
+        groupMembers = await userGroups.find({ group: invite.group, user: { $nin: invite.users } });
+      } else {
+        groupMembers = await userGroups.find({ group: invite.group });
+      }
+      let err = '';
+      await new Promise((resolve, reject) => {
+        groupMembers.forEach(async (member, i, array) => {
+          const deleteNote = {
+            type: 'deletedDateInvite',
+            data: {
+              invite_id: req.body.inviteId,
+              invite_title: invite.title,
+              date_date: invite.from,
+              group_id: group._id,
+              group_title: group.title,
+            },
+            user: member.user,
+            read: false,
+          };
+          const insertedNotes = await notifications.insert(deleteNote);
+          if (insertedNotes.error) {
+            err = 'Dates inserted. Notifications failed';
+          }
+          if (array.length - 1 === i) resolve();
+        });
+      });
+      if (insertedNote.error || err !== '') {
+        res.status(500);
+        next(new Error('Invites deleted. Notifications failed.'));
+      } else {
+        res.json({ message: 'Invites deleted. Notifications send.' });
+      }
+    } else {
+      res.status(500);
+      const err = new Error('An error occured while deleting the invites');
+      next(err);
+    }
   }
-  // delete creators deniedNote
-  const deletedInvite = await notifications.findOneAndDelete({ user: req.user._id, _id: req.body.noteId });
-  if (!deletedInvite.error) {
-    resultStr += 'Old notification deleted';
-  } else {
-    res.status(500);
-    const err = new Error('An error occured while deleting the old notification');
-    next(err);
-  }
-  res.json({ message: resultStr });
 };
 
 module.exports = {

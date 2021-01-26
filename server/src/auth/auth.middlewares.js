@@ -10,7 +10,8 @@ function checkTokenSetUser(req, res, next) {
     if (token) {
       jwt.verify(token, process.env.TOKEN_SECRET, (err, user) => {
         if (err) {
-          console.log(err);
+          res.status(401);
+          next(new Error('Token expired'));
         }
         req.user = user;
         next();

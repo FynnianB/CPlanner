@@ -7,6 +7,8 @@ const userInvites = db.get('userInvites');
 const invites = db.get('invites');
 const dates = db.get('dates');
 const notifications = db.get('notifications');
+const groupInvites = db.get('groupInvites');
+const disabled = db.get('disabled');
 
 module.exports = {
   groups,
@@ -16,4 +18,6 @@ module.exports = {
   invites,
   dates,
   notifications,
+  groupInvites,
+  disabled,
 };

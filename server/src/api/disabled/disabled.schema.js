@@ -1,8 +1,8 @@
 const Joi = require('joi');
 
 const schema = Joi.object({
-  from: Joi.date().required(),
-  to: Joi.date().min(Joi.ref('from')).required(),
+  from: Joi.date().iso().required(),
+  to: Joi.date().iso().min(Joi.ref('from')).required(),
 });
 
 const idSchema = Joi.object({

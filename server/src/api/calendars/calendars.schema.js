@@ -2,16 +2,16 @@ const Joi = require('joi');
 
 const schema = Joi.object({
   title: Joi.string().trim().max(100).required(),
-  from: Joi.date().required(),
-  to: Joi.date().min(Joi.ref('from')).required(),
+  from: Joi.date().iso().required(),
+  to: Joi.date().iso().min(Joi.ref('from')).required(),
   desc: Joi.string().trim(),
   location: Joi.string().trim(),
 });
 
 const patchSchema = Joi.object({
   title: Joi.string().trim().max(100),
-  from: Joi.date(),
-  to: Joi.date().min(Joi.ref('$oldFrom')),
+  from: Joi.date().iso(),
+  to: Joi.date().iso().min(Joi.ref('$oldFrom')),
   desc: Joi.string().trim(),
   location: Joi.string().trim(),
 });
@@ -21,8 +21,8 @@ const schemaId = Joi.object({
 });
 
 const zoneSchema = Joi.object({
-  from: Joi.date().required(),
-  to: Joi.date().min(Joi.ref('from')).required(),
+  from: Joi.date().iso().required(),
+  to: Joi.date().iso().min(Joi.ref('from')).required(),
 });
 
 module.exports = {

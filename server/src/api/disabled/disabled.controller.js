@@ -18,17 +18,8 @@ const list = async (req, res, next) => {
       user_id: req.user._id,
       date: { $gte: new Date(req.body.from), $lte: new Date(req.body.to) },
     });
-    const foundDates = await dates.find({
-      user_id: req.user._id,
-      $or: [
-        { from: { $gte: new Date(req.body.from), $lte: new Date(req.body.to) } },
-        { to: { $gte: new Date(req.body.from), $lte: new Date(req.body.to) } },
-      ],
-    });
-    if (!foundDisabled.error && !foundDates.error) {
-      const concatedDates = foundDisabled.concat(foundDates);
-      const disabledDates = [...new Set(concatedDates)];
-      res.json(disabledDates);
+    if (!foundDisabled.error) {
+      res.json(foundDisabled);
     } else {
       throw new Error('An error occured');
     }

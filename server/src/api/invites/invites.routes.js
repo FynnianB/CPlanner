@@ -9,5 +9,6 @@ router.get('/', controller.list);
 router.get('/:inviteId', middlewares.validateId, middlewares.inviteExists, controller.getItem);
 router.post('/', middlewares.validateInserts, middlewares.existsInputs, middlewares.userAllowed, controller.insertInvite);
 router.post('/:inviteId', middlewares.validateAnswer, middlewares.inviteExists, controller.answerInvite);
+router.put('/', middlewares.validateDate, middlewares.existsInputs, middlewares.userAllowed, controller.getUnavailable);
 
 module.exports = router;
