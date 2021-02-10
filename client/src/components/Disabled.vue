@@ -125,6 +125,7 @@ export default {
       const state = dateobj ? false : true
       if (state) {
         const datestr = dayjs(date).toISOString()
+        console.log(datestr, date)
         fetch(process.env.VUE_APP_API_URL+'api/v1/disabled', {
           method: 'PUT',
           headers: {

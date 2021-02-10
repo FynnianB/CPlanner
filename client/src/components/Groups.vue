@@ -865,6 +865,9 @@ export default {
             this.inviteAlertBox.enabled = true
           } else {
             this.resetInviteDialog()
+            this.error_sheet.context = 'Einladung erfolgreich versendet'
+            this.error_sheet.enabled = true
+            this.error_sheet.color = 'green'
           }
         });
       }
@@ -1091,6 +1094,9 @@ export default {
                 break
               case 'Invite already exists':
                 this.alertBox.context = 'Einladungen bereits verschickt'
+                break
+              case 'No other members in the group':
+                this.alertBox.context = 'Es sind keine weiteren Mitglieder in der Gruppe, die man einladen könnte'
                 break
               default:
                 this.alertBox.context = 'Beim Verschicken der Einladungen ist ein Fehler aufgetreten'
