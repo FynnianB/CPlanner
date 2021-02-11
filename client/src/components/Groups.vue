@@ -1113,35 +1113,51 @@ export default {
       }
     },
     showGroupInfo (group) {
-      fetch(process.env.VUE_APP_API_URL+'api/v1/groups/'+group._id, {
-        method: 'GET',
-        headers: {
-          authorization: `Bearer ${localStorage.token}`,
-          'content-type': 'application/json',
-        },
-      }).then(res => res.json())
-      .then(foundGroupInfo => {
-        this.selectedGroup = foundGroupInfo;
-        const d = new Date(this.selectedGroup.created).toLocaleDateString('de-DE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
-        const time = new Date(this.selectedGroup.created).toLocaleTimeString('de-DE', {hour: '2-digit', minute:'2-digit'})
-        this.selectedGroup.createdDate = d+', '+time+'h'
-        this.selectedGroup.events = []
-        this.events.forEach((event, i, array) => {
-          if (event.group && event.group === group._id) {
-            event.date = dayjs(event.start).format('DD.MM.YYYY')
-            if (event.timed) {
-              event.date += ' '+event.times[0]+'h'
+      if ((this.selectedGroup !== null && this.selectedGroup._id !== group._id) || this.selectedGroup === null) {
+        fetch(process.env.VUE_APP_API_URL+'api/v1/groups/'+group._id, {
+          method: 'GET',
+          headers: {
+            authorization: `Bearer ${localStorage.token}`,
+            'content-type': 'application/json',
+          },
+        }).then(res => res.json())
+        .then(foundGroupInfo => {
+          if (foundGroupInfo.message) {
+            this.error_sheet.color = 'red'
+            switch (foundGroupInfo.message) {
+              case 'Unable to proceed':
+                this.error_sheet.context = 'Diese Gruppe existiert nicht'
+                break;
+              default:
+                this.error_sheet.context = 'Es ist ein Fehler aufgetreten'
+                break;
             }
-            if (event.location) {
-              event.date += ', '+event.location
-            }
-            this.selectedGroup.events.push(event)
+            this.refresh()
+            this.error_sheet.enabled = true
           }
-        })
-        if (this.selectedGroup.admin === jwt.decode(localStorage.token)._id) {
-          this.selectedAdmin = true
-        }
-      });
+          this.selectedGroup = foundGroupInfo;
+          const d = new Date(this.selectedGroup.created).toLocaleDateString('de-DE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+          const time = new Date(this.selectedGroup.created).toLocaleTimeString('de-DE', {hour: '2-digit', minute:'2-digit'})
+          this.selectedGroup.createdDate = d+', '+time+'h'
+          this.selectedGroup.events = []
+          this.events.forEach((event, i, array) => {
+            if (event.group && event.group === group._id) {
+              event.date = dayjs(event.start).format('DD.MM.YYYY')
+              if (event.timed) {
+                event.date += ' '+event.times[0]+'h'
+              }
+              if (event.location) {
+                event.date += ', '+event.location
+              }
+              this.selectedGroup.events.push(event)
+            }
+          })
+          this.selectedGroup.members.sort((a, b) => a.memberRole.localeCompare(b.memberRole));
+          if (this.selectedGroup.admin === jwt.decode(localStorage.token)._id) {
+            this.selectedAdmin = true
+          }
+        });
+      }
     },
     getEvents () {
       fetch(process.env.VUE_APP_API_URL+'api/v1/calendars', {
