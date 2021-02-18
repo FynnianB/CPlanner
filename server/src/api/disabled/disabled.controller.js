@@ -2,8 +2,8 @@ const dayjs = require('dayjs');
 const { disabled, dates } = require('./disabled.model');
 
 function getDates(startDate, endDate) {
-  if (startDate !== endDate) {
-    return startDate;
+  if (startDate === endDate) {
+    return [startDate];
   }
   const dateArray = [];
   let currentDate = dayjs(startDate, 'MM-DD-YYYY');

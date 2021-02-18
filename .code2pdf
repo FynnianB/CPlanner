@@ -1,0 +1,24 @@
+:directories:
+  - .git
+  - client/node_modules
+  - server/node_modules
+  - client/.vercel
+  - client/src/assets
+  - client/public/img
+  - out
+  - .vscode
+  - .github
+  - client/.git
+  - server/.git
+:files:
+  - .gitignore
+  - yarn.lock
+  - .code2pdf
+  - favicon.ico
+  - .DS_Store
+  - yarn-error.log
+  - .eslintrc.js
+  - .env
+  - TODO.md
+  - LICENSE
+  - README.md
