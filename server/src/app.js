@@ -17,9 +17,11 @@ const calendars = require('./api/calendars/calendars.routes');
 const notifications = require('./api/notifications/notifications.routes');
 const disabled = require('./api/disabled/disabled.routes');
 
+const client = process.env.CLIENT_URL/* || 'http://localhost:8080' */;
+
 app.use(volleyball);
 app.use(cors({
-  origin: ['http://localhost:8080', 'https://cplanner.vercel.app', 'https://fynnianb.github.io'],
+  origin: [client, 'https://fynnianb.github.io'],
 }));
 app.use(express.json());
 app.use(helmet());
