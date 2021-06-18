@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "/CPlanner/precache-manifest.68b1d999a9df873742f07cc5cbb2af2c.js"
+  "/CPlanner/precache-manifest.2ba6f059c05226ff394cbe83eec0a163.js"
 );
 
 workbox.core.setCacheNameDetails({prefix: "cplanner"});
